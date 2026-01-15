@@ -450,11 +450,6 @@ class CandCppFormat <: BaseLanguage {
                 let currChar = i[stateBean.currentIndex]
                 //没解析完成的话保留在perLineOutput里
                 stateBean.perLineOutput.append(currChar)
-                if (currChar == r'#' && stateBean.isLineStart) {
-                    //处理宏的逻辑
-                    dealWithMacro(stateBean)
-                    continue
-                }
                 //处理private: public: protected:
                 if (stateBean.isLineStart) {
                     if (dealWithAccessPublic(stateBean)) {
