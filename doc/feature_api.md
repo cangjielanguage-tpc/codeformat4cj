@@ -2,7 +2,7 @@
 
 ## 介绍
 
-codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++语言
+codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++语言,OC/OC++,js/ts,java
 
 ### 全局函数
 
@@ -10,7 +10,8 @@ codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++语�
 /*
  * 格式化方法
  * 
- * 参数 languageType:String - 格式化的语言类型，目前只支持C和C++ languageType目前只支持"c"|"cpp"|"c++"|"clike"
+ * 参数 languageType:String - 格式化的语言类型，目前只支持C和C++ languageType目前只支持"c"|"cpp"|"c++"|"clike"|"java"|"js"|"ts"|
+        "javascript"|"typescript"    
  * 参数 code:String - 要格式化的代码
  * 参数 cfg:FormatConfig - 格式化配置对象
  * 返回值 String - 格式化后输出的字符串
