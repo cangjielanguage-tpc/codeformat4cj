@@ -1,10 +1,10 @@
 /*
- * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2026. All rights reserved.
  */
 
 package codeformat
 
-class CandCppFormat <: BaseLanguage {
+class CandJavaLikeFormat <: BaseLanguage {
     public override func dealWithNewLine(stateBean: StateBean): Unit {
         if (stateBean.perLineOutput.size > 0) {
             let lineBean: LineBean = LineBean()
@@ -476,7 +476,6 @@ class CandCppFormat <: BaseLanguage {
                 //处理单行注释
                 if (currChar == r'/' && stateBean.lastChar == r'/' && !stateBean.isInString) {
                     //这里先判断这种情况 前面没结束符号 不处理的话前面的内容会消失
-                    //template <typename T, int DEFAULT_SIZE = 10> // 带默认模板参数    
                     var str = stateBean.perLineOutput.toString().removeSuffix("//")
                     if (str.trimAscii().size > 0) {
                         dealWithSingleLineComment(stateBean, str)
@@ -488,7 +487,6 @@ class CandCppFormat <: BaseLanguage {
                 //处理多行注释
                 if (currChar == r'*' && stateBean.lastChar == r'/' && !stateBean.isInString) {
                     //这里先判断这种情况 前面没结束符号 不处理的话前面的内容会消失
-                    //template <typename T, int DEFAULT_SIZE = 10> /* 带默认模板参数    
                     var str = stateBean.perLineOutput.toString().removeSuffix("/*")
                     if (str.trimAscii().size > 0) {
                         dealWithMultiLineComment(stateBean, str)
@@ -622,6 +620,7 @@ class CandCppFormat <: BaseLanguage {
             }
             //过滤单行废弃
             removediscard(stateBean)
+
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
