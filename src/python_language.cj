@@ -213,10 +213,10 @@ class PythonFormat <: BaseLanguage {
         stateBean.currentIndex++
     }
 
-    public override func dealWithLeftBigBracket(stateBean: StateBean): Unit {
+    public override func dealWithLeftBigBracket(_: StateBean): Unit {
     }
 
-    public override func dealWithRightBigBracket(stateBean: StateBean): Unit {
+    public override func dealWithRightBigBracket(_: StateBean): Unit {
     }
 
     public func dealWithMultiLineString(stateBean: StateBean): Bool {
@@ -345,10 +345,10 @@ class PythonFormat <: BaseLanguage {
         }
     }
 
-    public override func dealWithSingleLineComment(stateBean: StateBean, perStr: String): Unit {
+    public override func dealWithSingleLineComment(_: StateBean, _: String): Unit {
     }
 
-    public override func dealWithMultiLineComment(stateBean: StateBean, perStr: String): Unit {
+    public override func dealWithMultiLineComment(_: StateBean, _: String): Unit {
     }
 
     public override func dealWithMacro(stateBean: StateBean): Unit {
@@ -401,15 +401,15 @@ class PythonFormat <: BaseLanguage {
         stateBean.isInMacro = false
     }
 
-    public override func dealWithAccessPublic(stateBean: StateBean): Bool {
+    public override func dealWithAccessPublic(_: StateBean): Bool {
         return false
     }
 
-    public override func dealWithAccessPrivate(stateBean: StateBean): Bool {
+    public override func dealWithAccessPrivate(_: StateBean): Bool {
         return false
     }
 
-    public override func dealWithAccessProtected(stateBean: StateBean): Bool {
+    public override func dealWithAccessProtected(_: StateBean): Bool {
         return false
     }
 
@@ -572,7 +572,7 @@ class PythonFormat <: BaseLanguage {
         }
     }
 
-    public override func dealWithFor(stateBean: StateBean): Unit {
+    public override func dealWithFor(_: StateBean): Unit {
         //c和cpp处理这个主要是为了for中的; python没有这种情况
     }
 
