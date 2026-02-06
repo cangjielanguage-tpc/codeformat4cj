@@ -765,7 +765,7 @@ class PythonFormat <: BaseLanguage {
                 if (!stateBean.isInString) {
                     dealWithDef(stateBean)
                 }
-                if (!stateBean.isInImport) {
+                if (!stateBean.isInString) {
                     dealWithImport(stateBean)
                 }
                 if (!stateBean.isInString) {
