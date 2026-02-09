@@ -879,6 +879,30 @@ class PythonFormat <: BaseLanguage {
             }
             removediscard(stateBean)
 
+            //处理上一行,结尾 下一行是];结尾的情况
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
+                if (codeStr.endsWith("]") && !codeStr.contains("[") && !lineBean.isInMultilineComment &&
+                    !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i > 0) {
+                        //有上一行，看上一行是不是逗号结尾
+                        let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        if (lastLineBean.codeLine.trimAscii().endsWith(",")) {
+                            //上一行以}结尾那么合并这两行
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            lastLineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
             //获得最终的list
             let usefulList: ArrayList<LineBean> = stateBean.linesList
             for (item in usefulList) {
