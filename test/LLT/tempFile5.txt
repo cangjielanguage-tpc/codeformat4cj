@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+struct Node{
+    int data;
+    struct Node*next;
+};
+struct Node*createNode(int data){
+    struct Node*node=(struct Node*)malloc(sizeof(struct Node));
+    node->data=data;
+    node->next=NULL;
+    return node;
+}
+void insert(struct Node**head,int data){
+    struct Node*newNode=createNode(data);
+    if(*head==NULL){
+        *head=newNode;
+        return;
+    }
+    struct Node*temp=*head;
+    while(temp->next!=NULL){
+        temp=temp->next;
+    }
+    temp->next=newNode;
+}
+void printList(struct Node*head){
+    struct Node*temp=head;
+    while(temp!=NULL){
+        printf("%d ",temp->data);
+        temp=temp->next;
+    }
+    printf("\\n");
+}
+void freeList(struct Node*head){
+    struct Node*temp;
+    while(head!=NULL){
+        temp=head;
+        head=head->next;
+        free(temp);
+    }
+}
+int main(){
+    struct Node*head=NULL;
+    int arr[]={7,3,9,1,4,6,2,8,5};
+    int n=sizeof(arr)/sizeof(arr[0]);
+    for(int i=0;i<n;i++){
+        insert(&head,arr[i]);
+    }
+    printf("链表元素:");
+    printList(head);
+    int sum=0;
+    for(int i=0;i<n;i++){
+        sum+=arr[i];
+    }
+    printf("数组总和:%d\\n",sum);
+    freeList(head);
+    return 0;
+}
