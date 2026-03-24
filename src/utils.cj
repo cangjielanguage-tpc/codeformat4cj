@@ -1,7 +1,3 @@
-/*
- * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
- */
-
 package codeformat
 
 internal import std.collection.ArrayList
@@ -64,7 +60,10 @@ func modifyMacroAndSpace(stateBean: StateBean): Unit {
 public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): String {
     if (let Some(i) <- languageType) {
         let result = match (i.toAsciiLower()) {
-            case "c" | "cpp" | "c++" | "clike" => CandCppFormat().formatCode(code, cfg)
+            case "c" | "cpp" | "c++" | "clike" | "objective-c" | "objective-c++" => CandJavaLikeFormat().formatCode(code, cfg)
+            case "java" => CandJavaLikeFormat().formatCode(code, cfg)
+            case "js" | "ts" | "javascript" | "typescript" => CandJavaLikeFormat().formatCode(code, cfg)
+            case "python" | "python3" | "py" | "py3" | "python ml" | "pythonml" | "pandas" | "pythondata" => PythonFormat().formatCode(code, cfg)
             case _ => code
         }
         return result
