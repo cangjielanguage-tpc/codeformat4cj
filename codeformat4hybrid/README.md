@@ -41,7 +41,7 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 - `codeformat4hybrid src main ets` ets代码目录
 - `codeformat4hybrid src main resources` 资源文件目录
 
-```
+
 
 ### 接口说明
 
@@ -52,14 +52,29 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 ## 使用说明
 
 ### 编译构建
+```ets
+    1. 通过中心仓下载安装
 
-描述具体的编译过程：
+        ohpm install @cangjie-tpc/codeformat_hybrid
+  
+        在项目中使用codeformat4hybrid项目
 
-```shell
-    1.先通过命令把代码下载下来
-      git clone -b 分支名 --depth 1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
+        import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid';
+      
+    2. 本地编译安装
+       
+        描述具体的编译过程：
+
+        1.先通过命令把代码下载下来
+        git clone -b codeformat_hybrid_cangjie-plugin-5.1.1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
               
-    2.在deveco里选择codeformat4hybrid模块,点击Build菜单,然后点击 Make Module 'codeformat4hybrid' 等待编译完成,项目则编译成功
+        2.在deveco里选择codeformat4hybrid模块,点击Build菜单,然后点击 Make Module 'codeformat4hybrid' 等待编译完成,项目则编译成功
+    
+        3. 然后在codeformat4hybrid模块下的build/default/outputs/default/下找到codeformat4hybrid.har
+    
+        4. 在项目中使用codeformat4hybrid项目
+
+        import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid';
     
 ```
 
@@ -71,7 +86,7 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 用户如何在自己项目里引入codeformat4hybrid，具体步骤如下：
 
 1. 通过git命令,把自己需要的codeformat4hybrid分支拉下来
-   git clone -b 分支名 --depth 1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
+   git clone -b codeformat_hybrid_cangjie-plugin-5.1.1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
    
 2. 把codeformat4hybrid项目用deveco编译通过，方法如上面的编译构建
 
@@ -81,7 +96,7 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 
 5. 然后在用户module下的oh-package.json5下面添加依赖
    "dependencies": {
-        "@cangjie-tpc/codeformat4hybrid": "file:./har/codeformat4hybrid.har"
+        "@cangjie-tpc/codeformat_hybrid": "file:./har/codeformat4hybrid.har"
    }
    添加完后点击自动弹出的sync now同步
     
@@ -97,7 +112,7 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 示例代码如下：
 ```ets
 
-import { CodeFormatTS } from '@cangjie-tpc/codeformat4hybrid'
+import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid'
 
 @Entry
 @Component
