@@ -1,0 +1,9 @@
+{
+  "module": {
+    "name": "codeformat4hybrid",
+    "type": "har",
+    "deviceTypes": [
+      "default"
+    ]
+  }
+}
