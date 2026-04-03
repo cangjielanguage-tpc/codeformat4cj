@@ -1,5 +1,5 @@
 {
-  "name": "libark_interop_api_codeformat4hybrid.so",
+  "name": "libark_interop_api_codeformat_hybrid.so",
   "types": "./index.d.ts",
   "version": "1.0.0",
   "description": ""

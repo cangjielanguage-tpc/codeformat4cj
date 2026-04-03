@@ -39,8 +39,8 @@
       ]
     },
     {
-      "name": "codeformat4hybrid",
-      "srcPath": "./codeformat4hybrid",
+      "name": "codeformat_hybrid",
+      "srcPath": "./codeformat_hybrid"
     }
   ]
 }

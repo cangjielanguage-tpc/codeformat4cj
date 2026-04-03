@@ -3,7 +3,7 @@
   compile-option = "--dy-std --cfg=\"${COMPILE_CONDITION}\""
   description = "a third-party library for code formatting"
   link-option = ""
-  name = "codeformat4hybrid"
+  name = "codeformat_hybrid"
   output-type = "dynamic"
   src-dir = "./src/main/cangjie"
   target-dir = ""

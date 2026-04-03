@@ -1,6 +1,6 @@
 {
   "module": {
-    "name": "codeformat4hybrid",
+    "name": "codeformat_hybrid",
     "type": "har",
     "deviceTypes": [
       "default"

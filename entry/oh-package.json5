@@ -6,7 +6,7 @@
   "author": "",
   "license": "",
   "dependencies": {
-    "@cangjie-tpc/codeformat_hybrid": "file:../codeformat4hybrid"
+    "@cangjie-tpc/codeformat_hybrid": "file:../codeformat_hybrid"
   }
 }
 
