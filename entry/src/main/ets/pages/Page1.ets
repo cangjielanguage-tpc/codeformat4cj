@@ -1,4 +1,4 @@
-import { CodeFormatTS } from '@cangjie-tpc/codeformat4hybrid'
+import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid'
 
 @Entry
 @Component
