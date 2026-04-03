@@ -1,5 +1,5 @@
 <div align="center">
-<h1>codeformat4hybrid</h1>
+<h1>codeformat</h1>
 </div>
 
 <p align="center">
@@ -12,7 +12,7 @@
 
 ## 介绍
 
-codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++,js/ts，java,python语言
+codeformat是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++,js/ts，java,python语言
 
 
 ### 特性
@@ -26,7 +26,7 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 ### 源码目录
 
 ```shell
-─codeformat4hybrid
+─codeformat_hybrid
   └─src
       └─main
           ├─cangjie
@@ -34,12 +34,12 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
           └─resources
 ```
 
-- `codeformat4hybrid` 工程模块 - 编译生成一个har包
-- `codeformat4hybrid src` 模块代码目录
-- `codeformat4hybrid src main` 模块项目目录
-- `codeformat4hybrid src main cangjie` 仓颉代码目录
-- `codeformat4hybrid src main ets` ets代码目录
-- `codeformat4hybrid src main resources` 资源文件目录
+- `codeformat_hybrid` 工程模块 - 编译生成一个har包
+- `codeformat_hybrid src` 模块代码目录
+- `codeformat_hybrid src main` 模块项目目录
+- `codeformat_hybrid src main cangjie` 仓颉代码目录
+- `codeformat_hybrid src main ets` ets代码目录
+- `codeformat_hybrid src main resources` 资源文件目录
 
 
 
@@ -51,13 +51,14 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
 
 ## 使用说明
 
-### 编译构建
+### 三方库导入使用
+
 ```ets
     1. 通过中心仓下载安装
 
         ohpm install @cangjie-tpc/codeformat_hybrid
   
-        在项目中使用codeformat4hybrid项目
+        在项目中使用codeformat项目
 
         import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid';
       
@@ -68,41 +69,28 @@ codeformat4hybrid是一个对代码进行格式化的库,目前仅支持C和C++,
         1.先通过命令把代码下载下来
         git clone -b codeformat_hybrid_cangjie-plugin-5.1.1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
               
-        2.在deveco里选择codeformat4hybrid模块,点击Build菜单,然后点击 Make Module 'codeformat4hybrid' 等待编译完成,项目则编译成功
+        2.在deveco里选择codeformat_hybrid模块,点击Build菜单,然后点击 Make Module 'codeformat_hybrid' 等待编译完成,项目则编译成功
     
-        3. 然后在codeformat4hybrid模块下的build/default/outputs/default/下找到codeformat4hybrid.har
+        3. 然后在codeformat_hybrid模块下的build/default/outputs/default/下找到codeformat_hybrid.har
+        
+        4. 用户在自己应用的module下新建一个文件夹名为har,然后把codeformat_hybrid.har文件放入其中
+
+        5. 然后在用户module下的oh-package.json5下面添加依赖
+           "dependencies": {
+                "@cangjie-tpc/codeformat_hybrid": "file:./har/codeformat_hybrid.har"
+           }
+           添加完后点击自动弹出的sync now同步
     
-        4. 在项目中使用codeformat4hybrid项目
+        6. 在项目中使用codeformat项目
 
         import { CodeFormatTS } from '@cangjie-tpc/codeformat_hybrid';
     
 ```
 
-### 三方库导入使用
 
-#### 1. 把codeformat4hybrid作为三方库依赖引入
 
-```ets
-用户如何在自己项目里引入codeformat4hybrid，具体步骤如下：
 
-1. 通过git命令,把自己需要的codeformat4hybrid分支拉下来
-   git clone -b codeformat_hybrid_cangjie-plugin-5.1.1 https://gitcode.com/Cangjie-TPC/codeformat4cj.git
-   
-2. 把codeformat4hybrid项目用deveco编译通过，方法如上面的编译构建
 
-3. 然后在codeformat4hybrid模块下的build/default/outputs/default/下找到codeformat4hybrid.har
-
-4. 用户在自己应用的module下新建一个文件夹名为har,然后把codeformat4hybrid.har文件放入其中
-
-5. 然后在用户module下的oh-package.json5下面添加依赖
-   "dependencies": {
-        "@cangjie-tpc/codeformat_hybrid": "file:./har/codeformat4hybrid.har"
-   }
-   添加完后点击自动弹出的sync now同步
-    
-6. 同步完成后就可以在自己的代码文件里引用codeformat4hybrid里的类了
-   
-```
 
 
 ### 功能示例

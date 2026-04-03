@@ -1,7 +1,7 @@
 {
   "name": "@cangjie-tpc/codeformat_hybrid",
   "version": "1.0.2",
-  "description": "codeformat4hybrid是一个用仓颉语言编写的适用于鸿蒙系统的代码格式化库。",
+  "description": "codeformat_hybrid是一个用仓颉语言编写的适用于鸿蒙系统的代码格式化库。",
   "main": "Index.ets",
   "author": "cangjie-tpc",
   "license": "Apache-2.0",
@@ -16,6 +16,6 @@
   ],
   "dependencies": {
     "libark_interop_loader.so": "file:./src/main/cangjie/loader",
-    "libark_interop_api_codeformat4hybrid.so": "file:./src/main/cangjie/libcodeformat4hybrid"
+    "libark_interop_api_codeformat_hybrid.so": "file:./src/main/cangjie/libcodeformat_hybrid"
   }
 }

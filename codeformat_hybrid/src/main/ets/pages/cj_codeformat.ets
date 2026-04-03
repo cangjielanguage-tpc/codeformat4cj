@@ -1,5 +1,5 @@
 import { requireCJLib } from 'libark_interop_loader.so'
-import { CustomLib } from "libark_interop_api_codeformat4hybrid.so"
+import { CustomLib } from "libark_interop_api_codeformat_hybrid.so"
 
 export let global_customLib: CustomLib | undefined = undefined
 
@@ -11,7 +11,7 @@ export class CodeFormatTS {
     this.useCangjie = useCangjie
     if (this.useCangjie) {
       if (global_customLib === undefined) {
-        global_customLib = requireCJLib("libcodeformat4hybrid.so") as CustomLib
+        global_customLib = requireCJLib("libcodeformat_hybrid.so") as CustomLib
       }
     } else {
       global_customLib = undefined

@@ -1,4 +1,4 @@
-package codeformat4hybrid
+package codeformat_hybrid
 
 internal import ohos.ark_interop.JSModule
 internal import ohos.ark_interop.JSContext
