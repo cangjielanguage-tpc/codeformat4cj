@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.1-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.2-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.5-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
@@ -12,7 +12,7 @@
 
 ## 介绍
 
-codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++,js/ts，java,python语言
+codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++,js/ts，java,python，go,kotlin语言
 
 
 ### 特性
@@ -21,6 +21,7 @@ codeformat4cj是一个对代码进行格式化的库,目前仅支持C和C++,OC/O
 
 - 🚀 支持C和C++代码格式化
 - 🚀 支持OC/OC++，js/ts，java，python代码的格式化
+- 🚀 支持Go和Kotlin代码格式化
 
 
 ### 源码目录

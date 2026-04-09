@@ -20,4 +20,6 @@ class LineBean {
 
     var isInMultiString: Bool = false //是不是在多行注释里面 python有用
 
+    var isSingleLine: Bool = false //确认是不是单行 go有用 import的）不加会被自动添加到上面一行末尾
+
 }
