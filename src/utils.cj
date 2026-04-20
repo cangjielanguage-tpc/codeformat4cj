@@ -64,9 +64,10 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "java" => CandJavaLikeFormat().formatCode(code, cfg)
             case "js" | "ts" | "javascript" | "typescript" => CandJavaLikeFormat().formatCode(code, cfg)
             case "python" | "python3" | "py" | "py3" | "python ml" | "pythonml" | "pandas" | "pythondata" => PythonFormat().formatCode(code, cfg)
-            case _ => code
+            case "go" => GoFormat().formatCode(code, cfg)
+            case _ => return code
         }
-        return result
+        return result.replace("\r\n","\n")
     } else {
         return code
     }

@@ -291,7 +291,7 @@ class PythonFormat <: BaseLanguage {
                         lineBean.codeLine = lineCodeList[index]
                         if (index == 0) {
                             lineBean.isFirstMultiCommentLine = true
-                            lineBean.mutlilineCommentisAfterChangline = true //python多行前面都是换行的，不然错误
+                            lineBean.multilineCommentisAfterChangeLine = true //python多行前面都是换行的，不然错误
                         }
                         //多行注释的缩进和StateBean一致
                         lineBean.indentLevel = stateBean.indentLevel

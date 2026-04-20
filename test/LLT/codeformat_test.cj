@@ -77,7 +77,7 @@ struct Node{int data;struct Node*next;};struct Node*createNode(int data){struct 
         let filePath: Path = Path("../../../test/LLT/tempFile1.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr1 = String.fromUtf8(allBytes)
-        @Assert(output1,expectedStr1)
+        @Assert(output1,expectedStr1.replace("\r\n","\n"))
     }
 
     @TestCase
@@ -86,7 +86,7 @@ struct Node{int data;struct Node*next;};struct Node*createNode(int data){struct 
         let filePath: Path = Path("../../../test/LLT/tempFile2.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr2 = String.fromUtf8(allBytes)
-        @Assert(output2,expectedStr2)
+        @Assert(output2,expectedStr2.replace("\r\n","\n"))
     }
 
     @TestCase
@@ -95,7 +95,7 @@ struct Node{int data;struct Node*next;};struct Node*createNode(int data){struct 
         let filePath: Path = Path("../../../test/LLT/tempFile3.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr3 = String.fromUtf8(allBytes)
-        @Assert(output3,expectedStr3)
+        @Assert(output3,expectedStr3.replace("\r\n","\n"))
     }
 
     @TestCase
@@ -104,7 +104,7 @@ struct Node{int data;struct Node*next;};struct Node*createNode(int data){struct 
         let filePath: Path = Path("../../../test/LLT/tempFile4.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr4 = String.fromUtf8(allBytes)
-        @Assert(output4,expectedStr4)
+        @Assert(output4,expectedStr4.replace("\r\n","\n"))
     }
 
     @TestCase
@@ -113,6 +113,6 @@ struct Node{int data;struct Node*next;};struct Node*createNode(int data){struct 
         let filePath: Path = Path("../../../test/LLT/tempFile5.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr5 = String.fromUtf8(allBytes)
-        @Assert(output5,expectedStr5)
+        @Assert(output5,expectedStr5.replace("\r\n","\n"))
     }
 }
