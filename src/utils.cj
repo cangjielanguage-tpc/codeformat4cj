@@ -65,6 +65,7 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "js" | "ts" | "javascript" | "typescript" => CandJavaLikeFormat().formatCode(code, cfg)
             case "python" | "python3" | "py" | "py3" | "python ml" | "pythonml" | "pandas" | "pythondata" => PythonFormat().formatCode(code, cfg)
             case "go" => GoFormat().formatCode(code, cfg)
+            case "kotlin" | "kt" => KotlinFormat().formatCode(code, cfg)
             case _ => return code
         }
         return result.replace("\r\n","\n")

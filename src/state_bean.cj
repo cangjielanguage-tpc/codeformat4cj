@@ -46,7 +46,7 @@ class StateBean {
     var isHasClass: Bool = false //是否有class python有用 主要是class和def一起的时候使用
     var isInBackQuote:Bool = false //是否在反引号里 在ts、go中有用
 
-    //dart语言
+    //dart、kotion语言
     var isTripleQuote: Bool = false //三引号
     var tripleQuoteCount: Int64 = 0 //三引号计数
 
