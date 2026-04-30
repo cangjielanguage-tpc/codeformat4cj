@@ -44,5 +44,12 @@ class StateBean {
     var multiStringQuote: Rune = r' ' //多行字符串的类型 python有用
     var isInImport: Bool = false //是否在Import中 python有用
     var isHasClass: Bool = false //是否有class python有用 主要是class和def一起的时候使用
-    var isInBackQuote:Bool = false //是否在反引号里 在ts中有用
+    var isInBackQuote:Bool = false //是否在反引号里 在ts、go中有用
+
+    //dart语言
+    var isTripleQuote: Bool = false //三引号
+    var tripleQuoteCount: Int64 = 0 //三引号计数
+
+    var smallBracketDoubleScala: Int64 = 0 //小括号配对 Scala有用
+    var isInVal:Bool = false //是否进入val Scala有用
 }

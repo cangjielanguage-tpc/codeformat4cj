@@ -1,0 +1,237 @@
+/*
+ * Copyright (c) Huawei Technologies Co., Ltd. 2025-2025. All rights reserved.
+ */
+// EXEC: cjc %import-path %L %l %f
+// EXEC: ./main
+
+package codeformat.test
+
+import codeformat.*
+import std.fs.*
+import std.unittest.*
+import std.unittest.testmacro.*
+
+main() {
+    let formatGo = FormatGo()
+    formatGo.testGoFormat()
+    return 0
+}
+
+@Test
+class FormatGo {
+var goFormatTestCode = #"
+package main
+import "fmt"
+import "time"
+import f "time"
+import . "package"
+import (
+"errors"
+"fmt"
+"strconv"
+"sync"
+"time"
+)
+import (
+f "fmt"          // 别名 f
+mytime "time"     // 别名 mytime
+)
+import (
+_ "database/sql"
+_ "github.com/go-sql-driver/mysql"
+)
+import (
+. "fmt"
+)
+// 结构体定义
+type User struct {
+ID   int
+Name string
+Age  int
+Addr Address
+}
+// 嵌套结构体
+type Address struct {
+City    string
+Street  string
+ZipCode string
+}
+// 接口定义
+type UserService interface {
+GetUser(id int) (*User, error)
+SaveUser(u *User) error
+}
+// UserServiceImpl 实现接口
+type UserServiceImpl struct {
+mu   sync.RWMutex
+data map[int]*User
+}
+func NewUserService() *UserServiceImpl {
+return &UserServiceImpl{
+data: make(map[int]*User),
+}
+}
+func (s *UserServiceImpl) GetUser(id int) (*User, error) {
+s.mu.RLock()
+defer s.mu.RUnlock()
+user, exists := s.data[id]
+if !exists {
+return nil, errors.New("user not found")
+}
+return user, nil
+}
+func (s *UserServiceImpl) SaveUser(u *User) error {
+if u == nil {
+return errors.New("user is nil")
+}
+s.mu.Lock()
+defer s.mu.Unlock()
+s.data[u.ID] = u
+return nil
+}
+// 普通函数
+func add(a, b int) int {
+str := `第一行
+第二行
+第三行`
+return a + b
+}
+// 多返回值函数
+func divide(a, b int) (int, error) {
+if b == 0 {
+return 0, errors.New("divide by zero")
+}
+return a / b, nil
+}
+// 可变参数
+func sum(nums ...int) int {
+total := 0
+for _, n := range nums {
+total += n
+}
+return total
+}
+// 延迟函数 + 异常恢复
+func safePanic() {
+defer func() {
+if err := recover(); err != nil {
+fmt.Println("recovered from panic:", err)
+}
+}()
+panic("something went wrong")
+}
+// 函数类型
+type CalcFunc func(int, int) int
+func execCalc(a, b int, fn CalcFunc) int {
+return fn(a, b)
+}
+// for 循环、if、switch、map、slice 综合演示
+func demoFlow() {
+for i, v := range nums {
+fmt.Printf("index: %d, value: %d\n", i, v)
+}
+// 普通 for
+for i := 0; i < 3; i++ {
+fmt.Println("loop", i)
+}
+// if else
+if len(nums) > 0 {
+fmt.Println("slice not empty")
+} else {
+fmt.Println("slice empty")
+}
+// switch
+age := 20
+// map
+userMap := map[string]int{
+"alice": 18,
+"bob":   20,
+}
+for k, v := range userMap {
+fmt.Println(k, v)
+}
+}
+// channel 演示
+func demoChannel() {
+ch := make(chan string, 2)
+ch <- "hello"
+ch <- "world"
+close(ch)
+for s := range ch {
+fmt.Println(s)
+}
+}
+// select 演示
+func demoSelect() {
+ch1 := make(chan string)
+ch2 := make(chan string)
+go func() {
+time.Sleep(10 * time.Millisecond)
+ch1 <- "from ch1"
+}()
+go func() {
+time.Sleep(5 * time.Millisecond)
+ch2 <- "from ch2"
+}()
+}
+// 结构体方法
+func (u *User) IsAdult() bool {
+return u.Age >= 18
+}
+// 指针、字符串转换
+func convertDemo() {
+i := 100
+p := &i
+fmt.Println("value:", *p)
+s := strconv.Itoa(i)
+fmt.Println("string:", s)
+}
+// 主函数
+func main() {
+str := `第一行
+第二行
+第三行
+我是多行字符串
+`
+fmt.Println("app:", appName, "version:", Version)
+// 调用函数
+fmt.Println("add 1+2 =", add(1, 2))
+res, err := divide(10, 2)
+if err != nil {
+fmt.Println("error:", err)
+} else {
+fmt.Println("divide result:", res)
+}
+fmt.Println("sum:", sum(1, 2, 3, 4, 5))
+switch x := 1; x {}
+// 流程控制
+demoFlow()
+// 异常恢复
+safePanic()
+fmt.Println("exec calc:", execCalc(3, 4, fn))
+// channel & select
+demoChannel()
+demoSelect()
+// 结构体 & 接口
+us := NewUserService()
+user, err := us.GetUser(1)
+if err != nil {
+fmt.Println("get user error:", err)
+} else {
+fmt.Println("get user:", user)
+fmt.Println("is adult:", user.IsAdult())
+}
+convertDemo()
+fmt.Println("demo finished")
+}
+"#
+        
+    @TestCase
+    func testGoFormat() {
+        let output = codeFormat("go", goFormatTestCode, FormatConfig(useTab: true, indentWidth: 4))
+        let filePath: Path = Path("../../../test/LLT/goFormatTest.txt")
+        let allBytes: Array<Byte> = File.readFrom(filePath)
+        let expectedStr = String.fromUtf8(allBytes)
+        @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+}
