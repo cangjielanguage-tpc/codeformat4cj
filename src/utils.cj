@@ -66,6 +66,12 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "python" | "python3" | "py" | "py3" | "python ml" | "pythonml" | "pandas" | "pythondata" => PythonFormat().formatCode(code, cfg)
             case "go" => GoFormat().formatCode(code, cfg)
             case "kotlin" | "kt" => KotlinFormat().formatCode(code, cfg)
+            case "php" => PhpFormat().formatCode(code, cfg)
+            case "scala" => ScalaFormat().formatCode(code, cfg)
+            case "csharp" | "c#"=> CandJavaLikeFormat().formatCode(code, cfg)
+            case "swift" => SwiftFormat().formatCode(code, cfg)
+            case "dart" => DartFormat().formatCode(code, cfg)
+            case "cangjie" => CangjieFormat().formatCode(code, cfg)
             case _ => return code
         }
         return result.replace("\r\n","\n")
