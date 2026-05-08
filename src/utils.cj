@@ -73,6 +73,7 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "dart" => DartFormat().formatCode(code, cfg)
             case "cangjie" => CangjieFormat().formatCode(code, cfg)
             case "rust" => RustFormat().formatCode(code, cfg)
+            case "bash" | "sh" | "shell" | "shellscript" => BashFormat().formatCode(code, cfg)
             case _ => return code
         }
         return result.replace("\r\n","\n")

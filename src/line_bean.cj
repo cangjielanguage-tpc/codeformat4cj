@@ -21,4 +21,6 @@ class LineBean {
     var isInMultiString: Bool = false //是不是在多行注释里面 python有用
 
     var isSingleLine: Bool = false //标记是否为独立单行，用于 Go import 的 ')' 防止被合并到上一行末尾
+
+    var isHeredocContent: Bool = false //标记是否为 heredoc 内容行，输出时不添加缩进
 }

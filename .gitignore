@@ -20,3 +20,6 @@ cjpm.lock
 log
 report
 tmp
+test_temp/
+ci_test/
+.atomcode/
