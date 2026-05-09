@@ -53,4 +53,30 @@ class StateBean {
 
     var smallBracketDoubleScala: Int64 = 0 //小括号配对 Scala有用
     var isInVal:Bool = false //是否进入val Scala有用
+
+    //sql
+    var isInBetween :Bool = false
+    var isInWhere :Bool = false  //给and or缩进用
+    var isHasWhere :Bool = false //给and or缩进用
+    var isInValues :Bool = false
+    var isSqlSmallBracket :Int64 = 0
+    var isInSet :Bool = false
+    var isInSelect :Bool = false
+    var isInDeleteFrom:Bool = false //delete from和from区分
+    var isInMultiJoin:Bool = false //multijoin和普通join区分
+    var isInFrom :Bool = false  //给innerjoin缩进用
+    var isHasFrom :Bool = false //给innerjoin缩进用
+    var isInJoin :Bool = false //给innerjoin缩进用
+    var isInGroupBy :Bool = false //给groupby后的,不要换行
+    var isInOrderBy:Bool = false //给orderBy后面的,不要换行
+    var isInCreateTable:Bool = false //给createTable后面的,不要换行
+    var isHasCreateTableLeft:Bool = false //给createTable后面的,不要换行
+    var isHasCreateTableRight:Bool = false //给createTable后面的,不要换行
+    var isFirstCreateTableLeft:Bool = true //给createTable后面的,不要换行
+    var isFirstCreateTableRight:Bool = true //给createTable后面的,不要换行
+    var isInAlertTable:Bool = true //给alertTable后面的缩进用
+    var isInSubSelect:Bool = false //给alertTable后面的缩进用
+    var isInSubSelectCount:Int64 = 0 //给alertTable后面的缩进用 这个记录左括号个数
+    var isJustTurnSubSelectFalse:Bool = false //是不是刚刚走出subselect
+    var subSelectHasInAndOr:Bool=false // subselect第一次进where如果没有and or的话要两层 然后碰到and or就只要一层够了 where退出的时候这个也要重置
 }

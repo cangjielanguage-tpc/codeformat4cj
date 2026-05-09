@@ -1,0 +1,8 @@
+select username,age,phone,address
+from user_list
+where status=1
+    and type=1
+    or type = 2
+    and create_time between '2024-01-01' and '2025-01-01'
+order by id desc
+limit 15;
