@@ -25,6 +25,8 @@ class BashFormat <: BaseLanguage {
 
     // 续行符状态
     var isInLineContinuation: Bool = false
+    var continuationIndent: Int64 = 0 // 续行的基础缩进级别
+    var isContinuationLine: Bool = false // true=当前行是续行的延续行
 
     // 复合命令状态
     var isInDoubleBracket: Bool = false // [[ ]]
@@ -285,8 +287,9 @@ class BashFormat <: BaseLanguage {
         }
         lineBean.codeLine = codeLine
 
-        if (isInLineContinuation) {
-            lineBean.indentLevel = stateBean.indentLevel
+        if (isContinuationLine) {
+            // 续行使用持续化缩进 +1（相对于原始命令缩进级别）
+            lineBean.indentLevel = continuationIndent + 1
         } else if (isInHeredoc) {
             lineBean.indentLevel = 0 // heredoc内容行不缩进
             lineBean.isHeredocContent = true
@@ -299,10 +302,6 @@ class BashFormat <: BaseLanguage {
         stateBean.perLineStartIndex = stateBean.currentIndex + 1
         stateBean.lastChar = r'\n'
         stateBean.savedIndentLevel = stateBean.indentLevel // 换行后保存当前缩进
-
-        if (isInLineContinuation && stateBean.lastChar != r'\\') {
-            isInLineContinuation = false
-        }
     }
 
     public override func dealWithAccessPublic(_: StateBean): Bool {
@@ -508,6 +507,8 @@ class BashFormat <: BaseLanguage {
 
         if (chars[idx] == r'\\' && isNewline(chars, idx + 1)) {
             isInLineContinuation = true
+            // 保存续行开始时的缩进级别（用于下一行缩进）
+            continuationIndent = stateBean.indentLevel
             return true
         }
         return false
@@ -1100,6 +1101,8 @@ class BashFormat <: BaseLanguage {
         isInHeredoc = false
         heredocDelimiter = ""
         isInLineContinuation = false
+        continuationIndent = 0
+        isContinuationLine = false
         skipNextRightParen = false
         isInDoubleBracket = false
         isInArithmetic = false
@@ -1120,6 +1123,7 @@ class BashFormat <: BaseLanguage {
             initAndProcessHeader(stateBean, chars)
             processMainLoop(stateBean, chars)
             dealWithNewLine(stateBean)
+            isContinuationLine = false // 续行结束
 
             // 应用空格规则
             for (line in stateBean.linesList) {
@@ -1182,6 +1186,7 @@ class BashFormat <: BaseLanguage {
             if (!stateBean.isInString && currChar == r'\\' && dealWithLineContinuation(stateBean)) {
                 stateBean.lastChar = currChar
                 dealWithNewLine(stateBean)
+                isContinuationLine = true // 下一行是续行内容
                 stateBean.currentIndex += 1 + getNewlineLength(chars, stateBean.currentIndex + 1)
                 stateBean.isLineStart = true
                 continue
@@ -1318,6 +1323,7 @@ class BashFormat <: BaseLanguage {
         }
 
         dealWithNewLine(stateBean)
+        isContinuationLine = false // 续行结束
 
         if (isHeredocDeclarationLine) {
             isInHeredoc = true
