@@ -26,7 +26,7 @@ while read line; do
     echo "$line"
 done < <(some_command)
 diff <(sort a.txt) \
-<(sort b.txt)
+    <(sort b.txt)
 "#
 
 @Test
