@@ -1,0 +1,4 @@
+update user_info
+set nickname='夏日晚风',age=28,phone='13856789012',email='summer@163.com',update_time='2026-05-07 10:30:45'
+where id=1086
+    and status=1;

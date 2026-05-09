@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <!-- 文档头部元信息 -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="author" content="HTML开发工程师">
+    <meta name="keywords" content="HTML语法测试,代码格式化测试,HTML全元素">
+    <meta name="description" content="用于测试HTML代码格式化功能的完整示例文件">
+    <title>HTML全语法格式化测试文件</title>
+    <!-- 内嵌CSS样式 -->
+    <style>
+        .container { margin: 20px; padding: 15px; }
+        .title { color: #2c3e50; text-align: center; }
+        table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+        td, th { border: 1px solid #333; padding: 8px; text-align: left; }
+    </style>
+</head>
+<body>
+    <!-- 页面主体内容 -->
+    <div class="container">
+        <!-- 标题标签 -->
+        <h1 class="title">HTML 全语法测试文档</h1>
+        <h2>二级标题演示</h2>
+        <h3>三级标题演示</h3>
+        <h4>四级标题演示</h4>
+        <h5>五级标题演示</h5>
+        <h6>六级标题演示</h6>
+        <hr>
+        <!-- 水平分割线 -->
+        <!-- 文本格式化标签 -->
+        <p>这是<strong>加粗</strong>文本、<em>斜体</em>文本、<u>下划线</u>文本、<s>删除线</s>文本</p>
+        <p>这是<mark>高亮标记</mark>文本、<small>小号字体</small>文本、<sup>上标</sup>、<sub>下标</sub></p>
+        <p>HTML特殊字符：&nbsp;空格 &amp; 和号 &lt; 小于号 &gt; 大于号 &copy; 版权符号</p>
+        <hr>
+        <!-- 列表标签：无序列表 -->
+        <h3>无序列表</h3>
+        <ul>
+            <li>列表项一</li>
+            <li>列表项二
+                <ul>
+                    <li>二级子列表1</li>
+                    <li>二级子列表2</li>
+                </ul>
+            </li>
+            <li>列表项三</li>
+        </ul>
+        <!-- 有序列表 -->
+        <h3>有序列表</h3>
+        <ol type="1">
+            <li>第一项</li>
+            <li>第二项</li>
+            <li>第三项</li>
+        </ol>
+        <!-- 自定义列表 -->
+        <h3>自定义列表</h3>
+        <dl>
+            <dt>HTML</dt>
+            <dd>超文本标记语言</dd>
+            <dt>CSS</dt>
+            <dd>层叠样式表</dd>
+        </dl>
+        <hr>
+        <!-- 链接与图片 -->
+        <h3>链接与图片</h3>
+        <a href="https://www.baidu.com" target="_blank" title="百度官网">外部链接</a>
+        <br>
+        <img src="test.jpg" alt="测试图片" width="200" height="100" loading="lazy">
+        <hr>
+        <!-- 表格标签 -->
+        <h3>表格演示</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>姓名</th>
+                    <th>年龄</th>
+                    <th>职业</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>张三</td>
+                    <td>25</td>
+                    <td>工程师</td>
+                </tr>
+                <tr>
+                    <td>李四</td>
+                    <td>30</td>
+                    <td>设计师</td>
+                </tr>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <td colspan="3">表格底部统计</td>
+                </tr>
+            </tfoot>
+        </table>
+        <hr>
+        <!-- 表单元素 -->
+        <h3>表单元素测试</h3>
+        <form action="/submit" method="post">
+            <div>
+                <label for="username">用户名：</label>
+                <input type="text" id="username" name="username" placeholder="请输入用户名" required>
+            </div>
+            <br>
+            <div>
+                <label for="pwd">密码：</label>
+                <input type="password" id="pwd" name="pwd" placeholder="请输入密码">
+            </div>
+            <br>
+            <div>
+                <label>性别：</label>
+                <input type="radio" name="gender" value="male" checked> 男
+                <input type="radio" name="gender" value="female"> 女
+            </div>
+            <br>
+            <div>
+                <label>爱好：</label>
+                <input type="checkbox" name="hobby" value="game"> 游戏
+                <input type="checkbox" name="hobby" value="read"> 阅读
+            </div>
+            <br>
+            <div>
+                <label for="city">城市：</label>
+                <select id="city" name="city">
+                    <option value="bj">北京</option>
+                    <option value="sh">上海</option>
+                    <option value="gz">广州</option>
+                </select>
+            </div>
+            <br>
+            <div>
+                <label for="desc">个人简介：</label>
+                <textarea id="desc" name="desc" rows="3" cols="30" placeholder="请输入简介"></textarea>
+            </div>
+            <br>
+            <div>
+                <input type="date">
+                <input type="number" min="0" max="100">
+                <input type="file">
+            </div>
+            <br>
+            <button type="submit">提交</button>
+            <button type="reset">重置</button>
+        </form>
+        <hr>
+        <!-- 语义化标签 -->
+        <h3>HTML5语义化标签</h3>
+        <header>页面头部区域</header>
+        <nav>导航菜单区域</nav>
+        <section>独立内容区域</section>
+        <article>文章内容区域</article>
+        <aside>侧边栏区域</aside>
+        <footer>页面底部区域</footer>
+        <hr>
+        <!-- 多媒体与内联框架 -->
+        <h3>多媒体与框架</h3>
+        <audio controls>
+            <source src="audio.mp3" type="audio/mpeg">
+            您的浏览器不支持音频播放
+        </audio>
+        <br>
+        <video width="320" height="240" controls>
+            <source src="video.mp4" type="video/mp4">
+            您的浏览器不支持视频播放
+        </video>
+        <br>
+        <iframe src="https://www.baidu.com" width="300" height="200" frameborder="0"></iframe>
+        <hr>
+        <!-- 块级与行内元素 -->
+        <div>这是div块级元素</div>
+        <span>这是span行内元素</span>
+        <!-- 内嵌脚本 -->
+        <script>
+            // 测试JavaScript脚本
+            console.log("HTML格式化测试文件加载完成");
+        </script>
+    </div>
+</body>
+</html>
