@@ -78,7 +78,7 @@ fun showError(msg:String)}
         let filePath: Path = Path("../../../test/LLT/ktFormatTest.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
-        File.writeTo("../../../test/LLT/kt.txt", output.toArray())
+        // File.writeTo("../../../test/LLT/kt.txt", output.toArray())
         @Assert(output, expectedStr.replace("\r\n","\n"))
     }
 }

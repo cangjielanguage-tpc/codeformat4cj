@@ -4,6 +4,7 @@ class StateBean {
     var codeChars: ?Array<Rune> = None
     var isLineStart: Bool = true
     var indentLevel: Int64 = 0 //缩进层级
+    var savedIndentLevel: Int64 = 0 //行开始时保存的缩进层级（用于关键字行正确缩进）
     var isInString: Bool = false //是否在字符串中
     var stringQuote: Rune = r' ' //字符串的类型
     var isInMacro: Bool = false //是否在宏中

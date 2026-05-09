@@ -214,7 +214,7 @@ println!("=== Rust Format Test End ===");
         let filePath: Path = Path("../../../test/LLT/rustFormatTest.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
-        File.writeTo("../../../test/LLT/rust.txt", output.toArray())
+        // File.writeTo("../../../test/LLT/rust.txt", output.toArray())
         @Assert(output, expectedStr.replace("\r\n","\n"))
     }
 }
