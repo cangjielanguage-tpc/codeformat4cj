@@ -3,7 +3,7 @@
 </div>
 
 <p align="center">
-<img alt="" src="https://img.shields.io/badge/release-v1.0.2-brightgreen" style="display: inline-block;" />
+<img alt="" src="https://img.shields.io/badge/release-v1.0.3-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/build-pass-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/cjc-v1.0.5-brightgreen" style="display: inline-block;" />
 <img alt="" src="https://img.shields.io/badge/project-open-brightgreen" style="display: inline-block;" />
@@ -12,7 +12,7 @@
 
 ## 介绍
 
-codeformat是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++,js/ts，java,python语言
+codeformat是一个对代码进行格式化的库,目前支持C和C++,OC/OC++,js/ts，Java,Python,Html,Go,kotlin,swift,Rust,C#,Dart,PHP,Cangjie,SQL,Scala,Bash 20种语言
 
 
 ### 特性
@@ -21,6 +21,7 @@ codeformat是一个对代码进行格式化的库,目前仅支持C和C++,OC/OC++
 
 - 🚀 支持C和C++代码格式化
 - 🚀 支持OC/OC++，js/ts，java，python代码的格式化
+- 🚀 支持Html,Go,kotlin,swift,Rust,C#,Dart,PHP,Cangjie,SQL,Scala,Bash代码的格式化
 - 🚀 支持仓颉arkts互操作
 
 ### 源码目录
@@ -153,9 +154,9 @@ struct page1Test {
 
 codeformat_hybrid依赖三方库：
 
-| 编号 | 依赖三方库         | 版本号      |
-|----|---------------|----------|
-| 1  | codeformat    | v1.0.1   | 	 
+| 编号 | 依赖三方库         | 版本号         |
+|----|---------------|-------------|
+| 1  | codeformat    | v1.0.2.B003 | 	 
 
 
 ## 开源协议
