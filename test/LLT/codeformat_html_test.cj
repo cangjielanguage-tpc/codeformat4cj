@@ -205,7 +205,7 @@ console.log("HTML格式化测试文件加载完成");
         let filePath: Path = Path("../../../test/LLT/htmlFormatTest.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
-        File.writeTo("../../../test/LLT/html.txt", output.toArray())
+        // File.writeTo("../../../test/LLT/html.txt", output.toArray())
         @Assert(output, expectedStr.replace("\r\n","\n"))
     }
 }
