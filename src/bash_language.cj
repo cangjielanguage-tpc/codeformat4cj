@@ -46,7 +46,6 @@ class BashFormat <: BaseLanguage {
 
     // ==================== 关键字检测方法 ====================
     // 预缓存常用关键字的字节（避免重复toRuneArray）
-    // IF_BYTES已删除（detectIf有特殊实现）
     private static let THEN_BYTES = unsafe { "then".rawData() }
     private static let ELIF_BYTES = unsafe { "elif".rawData() }
     private static let ELSE_BYTES = unsafe { "else".rawData() }
@@ -57,9 +56,7 @@ class BashFormat <: BaseLanguage {
     private static let SELECT_BYTES = unsafe { "select".rawData() }
     private static let DO_BYTES = unsafe { "do".rawData() }
     private static let DONE_BYTES = unsafe { "done".rawData() }
-    private static let CASE_BYTES = unsafe { "case".rawData() }
     private static let ESAC_BYTES = unsafe { "esac".rawData() }
-    private static let IN_BYTES = unsafe { "in".rawData() }
 
     /**
      * 检测并处理 if 关键字
@@ -117,22 +114,6 @@ class BashFormat <: BaseLanguage {
         detectKeyword(stateBean, FI_BYTES)
     }
 
-    public func detectFor(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, FOR_BYTES)
-    }
-
-    public func detectWhile(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, WHILE_BYTES)
-    }
-
-    public func detectUntil(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, UNTIL_BYTES)
-    }
-
-    public func detectSelect(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, SELECT_BYTES)
-    }
-
     public func detectLoopType(stateBean: StateBean): String {
         if (detectKeyword(stateBean, FOR_BYTES)) {
             return "for"
@@ -157,16 +138,8 @@ class BashFormat <: BaseLanguage {
         detectKeyword(stateBean, DONE_BYTES)
     }
 
-    public func detectCase(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, CASE_BYTES)
-    }
-
     public func detectEsac(stateBean: StateBean): Bool {
         detectKeyword(stateBean, ESAC_BYTES)
-    }
-
-    public func detectIn(stateBean: StateBean): Bool {
-        detectKeyword(stateBean, IN_BYTES)
     }
 
     /**
@@ -484,8 +457,43 @@ class BashFormat <: BaseLanguage {
     private func popStack(stack: ArrayList<FlagBean>, stateBean: StateBean): Unit {
         if (stack.size > 0) {
             stateBean.indentLevel = stack[stack.size - 1].flagIndent
+            stack.remove(at: stack.size - 1)
+        }
+    }
+
+    private func popStackWithIndentUpdate(stack: ArrayList<FlagBean>, stateBean: StateBean): Unit {
+        if (stack.size > 0) {
+            stateBean.indentLevel = stack[stack.size - 1].flagIndent
             stateBean.savedIndentLevel = stateBean.indentLevel
             stack.remove(at: stack.size - 1)
+        }
+    }
+
+    private func isSoloKeywordLine(lineContent: String, keyword: String): Bool {
+        let trimmed = lineContent.trimAscii()
+        if (trimmed == keyword) {
+            return true
+        }
+        if (trimmed.startsWith(";")) {
+            let afterSemi = trimmed.substring(1).trimAscii()
+            if (afterSemi == keyword) {
+                return true
+            }
+            if (afterSemi.startsWith(";")) {
+                if (afterSemi.substring(1).trimAscii() == keyword) {
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    private func handleKeywordEnd(stateBean: StateBean, stack: ArrayList<FlagBean>, keyword: String): Unit {
+        let lineContent = stateBean.perLineOutput.toString().trimAscii()
+        if (isSoloKeywordLine(lineContent, keyword)) {
+            popStackWithIndentUpdate(stack, stateBean)
+        } else {
+            popStack(stack, stateBean)
         }
     }
 
@@ -550,10 +558,9 @@ class BashFormat <: BaseLanguage {
 
             let delimStr = delimiter.toString()
             if (delimStr.size > 0) {
-                // isInHeredoc = true  // 不立即设置，等换行后再设置
                 heredocDelimiter = delimStr
                 heredocStripTabs = stripTabs
-                isHeredocDeclarationLine = true // 标记当前行是heredoc声明行
+                isHeredocDeclarationLine = true
 
                 // 将 <<... 定界符声明保存到当前行（第一个'<'已在主循环中添加）
                 for (i in idx + 1..delimiterIdx) {
@@ -1284,13 +1291,13 @@ class BashFormat <: BaseLanguage {
         }
 
         if (detectFi(stateBean)) {
-            popStack(ifStack, stateBean)
+            handleKeywordEnd(stateBean, ifStack, "fi")
         }
         if (detectDone(stateBean)) {
-            popStack(loopStack, stateBean)
+            handleKeywordEnd(stateBean, loopStack, "done")
         }
         if (detectEsac(stateBean)) {
-            popStack(caseStack, stateBean)
+            handleKeywordEnd(stateBean, caseStack, "esac")
         }
     }
 
