@@ -456,6 +456,50 @@ class DartFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
+            // 2.7 处理数组场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("[") && 
+                codeStr.replace(" ", "").contains("=[") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        var leftBrace = 0
+                        while (!((leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]") == -1) &&
+                        (nextLineBean.codeLine.trimAscii() == "]" || nextLineBean.codeLine.trimAscii() == "];"))) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
+                            nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理switch-case场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
+                if (codeStr.startsWith("switch") && codeStr.endsWith("{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    var x = 1
+                    var leftBrace = 0
+                    var nextLineBean = stateBean.linesList[i + x]
+                    while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
+                        leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                        x++
+                        if(!(nextLineBean.codeLine.trimAscii().startsWith("case") || nextLineBean.codeLine.trimAscii().startsWith("default") || nextLineBean.codeLine.trimAscii().endsWith(":"))) {
+                            nextLineBean.indentLevel++
+                        }
+                        nextLineBean = stateBean.linesList[i + x]
+                    }
+                }
+            }
+            removediscard(stateBean)
+
             // ========== 第三阶段：生成阶段 ==========
             // 获取最终有效的行列表（过滤掉废弃的行）
             let usefulList: ArrayList<LineBean> = stateBean.linesList
