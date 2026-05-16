@@ -241,24 +241,24 @@ class PhpFormat <: GeneralProcessing {
             removediscard(stateBean)
 
             //如果if开头 ;结尾和下一行连在一起
-            for (i in 0..stateBean.linesList.size) {
-                let lineBean: LineBean = stateBean.linesList[i]
-                let codeStr = lineBean.codeLine.trimAscii()
-                if (codeStr.startsWith("if ") && codeStr.endsWith(";") && !lineBean.isInMultilineComment &&
-                    !lineBean.isInSinglelineComment) {
-                    //如果当前行是单行注释，那就看他有没有上一行
-                    if (i < stateBean.linesList.size - 1) {
-                        //有上一行，看上一行的结束是不是\n
-                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
-                        let stringbuilder: StringBuilder = StringBuilder()
-                        stringbuilder.append(lineBean.codeLine)
-                        stringbuilder.append(nextLineBean.codeLine)
-                        lineBean.codeLine = stringbuilder.toString()
-                        nextLineBean.isDiscarded = true
-                    }
-                }
-            }
-            removediscard(stateBean)
+            // for (i in 0..stateBean.linesList.size) {
+            //     let lineBean: LineBean = stateBean.linesList[i]
+            //     let codeStr = lineBean.codeLine.trimAscii()
+            //     if (codeStr.startsWith("if ") && codeStr.endsWith(";") && !lineBean.isInMultilineComment &&
+            //         !lineBean.isInSinglelineComment) {
+            //         //如果当前行是单行注释，那就看他有没有上一行
+            //         if (i < stateBean.linesList.size - 1) {
+            //             //有上一行，看上一行的结束是不是\n
+            //             let nextLineBean: LineBean = stateBean.linesList[i + 1]
+            //             let stringbuilder: StringBuilder = StringBuilder()
+            //             stringbuilder.append(lineBean.codeLine)
+            //             stringbuilder.append(nextLineBean.codeLine)
+            //             lineBean.codeLine = stringbuilder.toString()
+            //             nextLineBean.isDiscarded = true
+            //         }
+            //     }
+            // }
+            // removediscard(stateBean)
 
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
@@ -305,6 +305,36 @@ class PhpFormat <: GeneralProcessing {
                 }
             }
             removediscard(stateBean)
+
+
+
+                //巧妙处理二维数组
+
+                var inInDoubleArray = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    // 1. 进入 switch {
+                    if (t.endsWith("=[") || t.contains("=[//") || t.contains("=[/*")) {
+                        inInDoubleArray = true
+                        continue
+                    }
+
+                    // 2. 离开 switch }
+                    if ((t == "];" || t.startsWith("];//") || t.startsWith("];/*")) && inInDoubleArray) {
+                        inInDoubleArray = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inInDoubleArray) {
+                        line.indentLevel = line.indentLevel+1
+                    }
+                }
+
+
+
 
 
             //处理单行只有);但是上一行是}结尾的情况

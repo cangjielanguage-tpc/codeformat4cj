@@ -351,6 +351,121 @@ class ScalaFormat <: GeneralProcessing {
             removediscard(stateBean)
 
 
+
+             //处理import {
+             //}问题   
+             for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if ((codeStr.startsWith("import ") && codeStr.endsWith("{")) && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        //如果这样的话，这一行的内容要加到上一行的后面
+                        let stringbuilder: StringBuilder = StringBuilder()
+                        stringbuilder.append(lineBean.codeLine + " ")
+                        stringbuilder.append(nextLineBean.codeLine.trimAscii())
+                        lineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                        nextLineBean.isDiscarded = true
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if (codeStr.startsWith("import ") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        //如果这样的话，这一行的内容要加到上一行的后面
+                        if(nextLineBean.codeLine.trimAscii() == "}"){
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lineBean.codeLine)
+                            stringbuilder.append(nextLineBean.codeLine.trimAscii())
+                            lineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                            nextLineBean.isDiscarded = true    
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+
+
+            
+                //巧妙处理swicth的缩进
+
+                var inSwitchBlock = false
+                var needIndent = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii()
+
+                    // 1. 进入 switch {
+                    if (t.startsWith("switch ") && t.contains("{")) {
+                        inSwitchBlock = true
+                        needIndent = false
+                    }
+
+                    // 2. 离开 switch }
+                    if (t == "}" && inSwitchBlock) {
+                        inSwitchBlock = false
+                        needIndent = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inSwitchBlock) {
+                        if (t.startsWith("case ") || t.startsWith("default")) {
+                            // case / default → 缩进 1 级
+                            //line.indentLevel = line.indentLevel+1
+                            needIndent = true
+                        } else if (needIndent) {
+                            // case 下面一行 → 再缩进 1 级（总共 2 级）
+                            line.indentLevel = line.indentLevel+1
+                        }
+                    }
+                }
+
+
+
+
+                 //巧妙处理二维数组
+
+                var inInDoubleArray = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    // 1. 进入 switch {
+                    if (t.endsWith("]]=Array(") || t.contains("]]=Array(//") || t.contains("]]=Array(/*")) {
+                        inInDoubleArray = true
+                        continue
+                    }
+
+                    // 2. 离开 switch }
+                    if ((t == ")" || t.startsWith(")//") || t.startsWith(")/*")) && inInDoubleArray) {
+                        inInDoubleArray = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inInDoubleArray) {
+                        line.indentLevel = line.indentLevel+1
+                    }
+                }
+
+
+
+
+
+
+
+
+
+
             //获得最终的list
             let usefulList: ArrayList<LineBean> = stateBean.linesList
             for (item in usefulList) {

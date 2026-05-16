@@ -1,4 +1,4 @@
-insert into product_info(product_name,category_id,price,stock,sale_num,create_time,status)
-values('无线机械键盘',26,199.90,860,125,'2025-03-18 14:26:30',1),
+INSERT INTO product_info(product_name,category_id,price,stock,sale_num,create_time,status)
+VALUES('无线机械键盘',26,199.90,860,125,'2025-03-18 14:26:30',1),
     ('蓝牙降噪耳机',26,299.00,520,368,'2025-03-20 09:15:22',1),
     ('桌面立式支架',35,49.90,1200,896,'2025-03-22 16:40:18',0);

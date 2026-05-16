@@ -405,6 +405,36 @@ await test.runAllTests();
 
 final test2 = DartSyntaxTest();
 await test2.runAllTests();
+List<List<int>> matrix = [
+[1, 2, 3, 4, 5],
+[6, 7, 8, 9, 10],
+[11, 12, 13, 14, 15],
+[16, 17, 18, 19, 20],
+[21, 22, 23, 24, 25]
+];
+// switch 语句（支持 continue 和 when 守卫）
+String command = 'open';
+switch (command) {
+case 'open':
+print('Opening...');
+continue close; // 跳转到标签
+close:
+case 'close':
+print('Closing...');
+break;
+default:
+print('Unknown');
+}
+// 使用 when 守卫（Dart 3.0+）
+int value = 5;
+switch (value) {
+case > 10:
+print('大于10');
+case < 0:
+print('负数');
+default:
+print('0-10之间');
+}
 }
 "#
         

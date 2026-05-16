@@ -520,6 +520,7 @@ open class GeneralProcessing <: BaseLanguage {
         stateBean.currentIndex++
     }
 
+    // true没有被转义，false被转义
     public func handleTransferCharacters(charArr: Array<Rune>, lastIndex: Int64): Bool {
         var count: Int64 = 0
         var indexChar: Rune = charArr[lastIndex - count]

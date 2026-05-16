@@ -68,14 +68,14 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "kotlin" | "kt" => KotlinFormat().formatCode(code, cfg)
             case "php" => PhpFormat().formatCode(code, cfg)
             case "scala" => ScalaFormat().formatCode(code, cfg)
-            case "csharp" | "c#"=> CandJavaLikeFormat().formatCode(code, cfg)
+            case "csharp" | "c#"=> CsharpFormat().formatCode(code, cfg)
             case "swift" => SwiftFormat().formatCode(code, cfg)
             case "dart" => DartFormat().formatCode(code, cfg)
             case "cangjie" => CangjieFormat().formatCode(code, cfg)
             case "rust" => RustFormat().formatCode(code, cfg)
             case "bash" | "sh" | "shell" | "shellscript" => BashFormat().formatCode(code, cfg)
             case "html"| "html5" => HtmlFormat().formatCode(code, cfg)
-            case "sql" | "mysql" | "oracle" | "oraclesql"| "sqlserver" | "ms sql server" | "mssql" | "postqresql" | "pqsql" => SqlFormat().formatCode(code, cfg)
+            case "sql" | "mysql" | "oracle" | "oraclesql"| "sqlserver" | "ms sql server" | "mssql" | "postgresql" | "pgsql" => SqlFormat().formatCode(code, cfg)
             case _ => return code
         }
         return result.replace("\r\n","\n")

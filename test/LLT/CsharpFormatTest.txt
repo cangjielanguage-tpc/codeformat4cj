@@ -80,7 +80,8 @@ public abstract class BaseEntity
     // 虚方法
     public virtual void Validate()
     {
-        if (Id <= 0) throw new ArgumentOutOfRangeException(nameof(Id), "ID必须大于0");
+        if (Id <= 0)
+            throw new ArgumentOutOfRangeException(nameof(Id), "ID必须大于0");
     }
 }
 // 实现类 - 测试继承、接口实现、方法重写
@@ -104,7 +105,8 @@ public class User : BaseEntity, IComparable<User>
         get => _password;
         set
         {
-            if (!string.IsNullOrEmpty(value)) _password = value;
+            if (!string.IsNullOrEmpty(value))
+                _password = value;
         }
     }
     // 静态构造函数
@@ -133,8 +135,10 @@ public class User : BaseEntity, IComparable<User>
     public override void Validate()
     {
         base.Validate();
-        if (string.IsNullOrEmpty(UserName)) throw new ArgumentException("用户名不能为空");
-        if (Age < 0 || Age > 150) throw new ArgumentOutOfRangeException(nameof(Age), "年龄必须在0-150之间");
+        if (string.IsNullOrEmpty(UserName))
+            throw new ArgumentException("用户名不能为空");
+        if (Age < 0 || Age > 150)
+            throw new ArgumentOutOfRangeException(nameof(Age), "年龄必须在0-150之间");
     }
     // 实现接口方法
     public int CompareTo(User other)
@@ -168,7 +172,8 @@ public class UserRepository : IRepository<User>
     }
     public void Add(User entity)
     {
-        if (entity == null) throw new ArgumentNullException(nameof(entity));
+        if (entity == null)
+            throw new ArgumentNullException(nameof(entity));
         _users.Add(entity);
     }
     public List<User> GetAll()
@@ -307,17 +312,17 @@ public class CSharpSyntaxTest
         switch (level)
         {
             case LogLevel.Debug:
-            Console.WriteLine("调试日志");
-            break;
+                Console.WriteLine("调试日志");
+                break;
             case LogLevel.Info:
-            Console.WriteLine("信息日志");
-            break;
+                Console.WriteLine("信息日志");
+                break;
             case LogLevel.Error:
-            Console.WriteLine("错误日志");
-            break;
+                Console.WriteLine("错误日志");
+                break;
             default:
-            Console.WriteLine("其他日志");
-            break;
+                Console.WriteLine("其他日志");
+                break;
         }
         // 三元运算符
         string status = count > 0 ? "已执行" : "未执行";
@@ -351,5 +356,49 @@ public class ConsoleLogger : ILogger
     {
         await Task.Delay(100); // 模拟异步操作
         Console.WriteLine($"[异步日志] {message}");
+        int[,] matrix = {
+            {1,  2,  3,  4,  5 },
+            {6,  7,  8,  9, 10 },
+            {11, 12, 13, 14, 15 },
+            {16, 17, 18, 19, 20 },
+            {21, 22, 23, 24, 25 }
+        };
+        // ---------- 控制流 ----------
+        Console.WriteLine("\n--- 2. 控制流 ---");
+        // if-else
+        if (count > 10)
+            Console.WriteLine("count > 10");
+        else
+            Console.WriteLine("count <= 10");
+        // for / foreach / while / do-while
+        for (int i = 0; i < 3; i++)
+            Console.Write($"{i} ");
+        Console.WriteLine();
+        var numbers = new List<int> {1, 2, 3 };
+        foreach (var num in numbers)
+            Console.Write($"{num} ");
+        Console.WriteLine();
+        // 传统 switch 语句（含 goto 演示）
+        switch (count)
+        {
+            case 42:
+                Console.WriteLine("count is 42");
+                goto case 100;
+            case 100:
+                Console.WriteLine("count was 42 but goto 100");
+                break;
+            default:
+                Console.WriteLine("other");
+                break;
+        }
+        // ---------- 类、结构、记录 ----------
+        Console.WriteLine("\n--- 5. 类、结构、记录 ---");
+        PersonRecord person = new("John", "Doe");
+        PersonRecord person2 = person with {FirstName = "Jane" }; // with 表达式
+        Console.WriteLine($"Record person: {person}, modified: {person2}");
+        Vector v1 = new(3, 4);
+        Vector v2 = new(1, 2);
+        Vector sum = v1 + v2;
+        Console.WriteLine($"{v1.Greet()} + {v2.Greet()} = {sum.Greet()}");
     }
 }
