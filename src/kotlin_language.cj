@@ -358,12 +358,13 @@ class KotlinFormat <: GeneralProcessing {
                 }
                 // 过滤使用了转义的`符号
                 if (lineBean.codeLine.contains("\"\"\"") && 
-                !handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("\"\"\"").getOrThrow())) {
+                !(lineBean.codeLine.trimAscii() == "\"\"\"") &&
+                !(handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("\"\"\"").getOrThrow() - 1))) {
                     continue
                 }
                 var nextLineBean = stateBean.linesList[i + x]
                 while (!(nextLineBean.codeLine.trimAscii().endsWith("\"\"\"") &&
-                handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("\"\"\"").getOrThrow()))) {
+                (lineBean.codeLine.trimAscii() == "\"\"\"" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("\"\"\"").getOrThrow() - 1)))) {
                     x++
                     nextLineBean = stateBean.linesList[i + x]
                 }

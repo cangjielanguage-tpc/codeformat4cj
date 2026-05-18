@@ -75,7 +75,7 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
             case "rust" => RustFormat().formatCode(code, cfg)
             case "bash" | "sh" | "shell" | "shellscript" => BashFormat().formatCode(code, cfg)
             case "html"| "html5" => HtmlFormat().formatCode(code, cfg)
-            case "sql" | "mysql" | "oracle" | "oraclesql"| "sqlserver" | "ms sql server" | "mssql" | "postqresql" | "pqsql" => SqlFormat().formatCode(code, cfg)
+            case "sql" | "mysql" | "oracle" | "oraclesql"| "sqlserver" | "ms sql server" | "mssql" | "postgresql" | "pgsql" => SqlFormat().formatCode(code, cfg)
             case _ => return code
         }
         return result.replace("\r\n","\n")

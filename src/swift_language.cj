@@ -371,13 +371,13 @@ class SwiftFormat <: GeneralProcessing {
                     if (i > 0) {
                         //有上一行，看上一行的结束是不是\n
                         let lastLineBean: LineBean = stateBean.linesList[i - 1]
-                        if (lastLineBean.codeLine.trimAscii() == "}") {
+                        if (lastLineBean.codeLine.trimAscii().endsWith("}")) {
                             //如果这样的话，这一行的内容要加到上一行的后面
                             let stringbuilder: StringBuilder = StringBuilder()
                             stringbuilder.append(lastLineBean.codeLine)
                             stringbuilder.append(lineBean.codeLine)
-                            lineBean.codeLine = stringbuilder.toString().replace("\n", "")
-                            lastLineBean.isDiscarded = true
+                            lastLineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                            lineBean.isDiscarded = true
                         }
                     }
                 }

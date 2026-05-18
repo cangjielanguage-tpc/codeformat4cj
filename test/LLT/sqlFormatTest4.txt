@@ -1,5 +1,5 @@
-delete from order_data
-where user_id=529
-    and order_type=2
-    and create_time<'2026-01-01'
-    and is_delete=0;
+DELETE FROM order_data
+WHERE user_id=529
+    AND order_type=2
+    AND create_time<'2026-01-01'
+    AND is_delete=0;

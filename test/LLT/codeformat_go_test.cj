@@ -225,7 +225,7 @@ fmt.Println("demo finished")
         
     @TestCase
     func testGoFormat() {
-        let output = codeFormat("go", goFormatTestCode, FormatConfig(useTab: true, indentWidth: 4))
+        let output = codeFormat("go", goFormatTestCode, FormatConfig())
         let filePath: Path = Path("../../../test/LLT/goFormatTest.txt")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
