@@ -314,6 +314,14 @@ lineBean.isDiscarded = true
 }
 }
 }
+// 定义一个 5x5 的二维数组
+let matrix: Array<Array<Int64>> = [
+[ 1,  2,  3,  4,  5],
+[ 6,  7,  8,  9, 10],
+[11, 12, 13, 14, 15],
+[16, 17, 18, 19, 20],
+[21, 22, 23, 24, 25]
+]
 removediscard(stateBean)
 //处理一下foreach的情况
 for (i in 0..stateBean.linesList.size) {
@@ -368,6 +376,88 @@ return stateBean.output.toString()
 } else {
 return ""
 }
+}
+}
+class DatabaseConnection {
+private lazy var connection: Connection = {
+println("创建数据库连接...")
+return createConnection()
+}
+private func createConnection(): Connection {
+// 模拟创建连接
+return Connection()
+}
+func query(sql: String): String {
+return connection.execute(sql)
+}
+}
+// ==================== 20. 操作符重载 ====================
+class Complex {
+var real: Float64
+var imaginary: Float64
+init(real: Float64, imaginary: Float64) {
+this.real = real
+this.imaginary = imaginary
+}
+operator func +(other: Complex): Complex {
+return Complex(
+this.real + other.real,
+this.imaginary + other.imaginary
+)
+}
+operator func -(other: Complex): Complex {
+return Complex(
+this.real - other.real,
+this.imaginary - other.imaginary
+)
+}
+operator func *(scalar: Float64): Complex {
+return Complex(
+this.real * scalar,
+this.imaginary * scalar
+)
+}
+func toString(): String {
+return "${this.real} + ${this.imaginary}i"
+}
+}
+// 实现多个接口
+class Rectangle {
+// 数组初始化
+let arr1: Array<Int64> = [1, 2, 3, 4, 5]
+let arr2 = [10, 20, 30, 40, 50
+]
+var mutableArr = ArrayList<Int64>([100, 200, 300
+])
+// 匿名函数
+let doubled = applyOperation(10, { (x: Int64) => x * 2 })
+// 字典定义
+let dict1: HashMap<String, Int64> = HashMap<String, Int64>(
+)
+    dict1["one"] = 1
+  dict1["two"] = 2
+dict1["three"] = 3
+let dict2 = HashMap<String, String>([
+    ("name", "仓颉"),
+    ("version", "1.1.0"),
+("author", "华为")
+])
+var x: Int64
+var y: Int64
+var width: Int64
+var height: Int64
+init(x: Int64, y: Int64, width: Int64, height: Int64) {
+this.x = x
+this.y = y
+this.width = width
+this.height = height
+}
+public func draw(): String {
+return "绘制矩形: (${x}, ${y}) ${width}x${height}"
+}
+public func move(dx: Int64, dy: Int64): Unit {
+this.x += dx
+this.y += dy
 }
 }
 "#

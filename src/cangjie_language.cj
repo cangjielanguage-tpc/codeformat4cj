@@ -380,6 +380,167 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
+            // 处理数组场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("[") && 
+                codeStr.replace(" ", "").contains("=[") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        var leftBrace = 0
+                        while (!((leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]") == -1) &&
+                        (nextLineBean.codeLine.trimAscii() == "]" || nextLineBean.codeLine.trimAscii() == "];"))) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
+                            nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理修饰符场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if ((codeStr.trimAscii() == "private" || 
+                codeStr.trimAscii() == "public" ||
+                codeStr.trimAscii() == "protected") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        lineBean.codeLine = codeStr.trimAscii() + " " + nextLineBean.codeLine.trimAscii()
+                        nextLineBean.isDiscarded = true
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理return场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().startsWith("return") && 
+                codeStr.trimAscii().endsWith("(") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        var leftBrace = 0
+                        while (!((leftBrace + nextLineBean.codeLine.count("(") - nextLineBean.codeLine.count(")") == -1) &&
+                        nextLineBean.codeLine.trimAscii() == ")" )) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("(") - nextLineBean.codeLine.count(")")
+                            nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+            
+            // 处理多余换行的场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii() == ")" &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i > 0) {
+                        var lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        if (lastLineBean.codeLine.count("(") - lastLineBean.codeLine.count(")") == 1) {
+                            lastLineBean.codeLine = lastLineBean.codeLine.trimAscii().replace("\n", "") + ")"
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 2.7 处理数组场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("[") &&
+                !codeStr.trimAscii().replace(" ", "").contains("=[") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        var leftBrace = 0
+                        while (!(leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]") == -1)) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
+                            nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                        // 只有一行，加到上一行末尾
+                        if (x == 1) {
+                            lineBean.codeLine = lineBean.codeLine.trimAscii().replace("\n", "") + nextLineBean.codeLine.trimAscii()
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理单行有未闭合的]、)、}这类符号，上一行有未闭合的[、(、{，则将该行添加到上一行
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                var rightSymbolArr = ArrayList<String>()
+                var unclosedSymbols = false
+                if (codeStr.count("[") - codeStr.count("]") == -1) {
+                    rightSymbolArr.add("]")
+                    unclosedSymbols = true
+                }
+                
+                if (codeStr.count("(") - codeStr.count(")") == -1) {
+                    rightSymbolArr.add(")")
+                    unclosedSymbols = true
+                }
+                
+                if (codeStr.count("{") - codeStr.count("}") == -1) {
+                    rightSymbolArr.add("}")
+                    unclosedSymbols = true
+                }
+                
+                if (codeStr.count("<") - codeStr.count(">") == -1) {
+                    rightSymbolArr.add(">")
+                    unclosedSymbols = true
+                }
+
+                if (unclosedSymbols &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        for (i in 0..rightSymbolArr.size) {
+                            var antiSymbol = match (rightSymbolArr[i]) {
+                                case "]" => "["
+                                case "}" => "{"
+                                case ")" => "("
+                                case ">" => "<"
+                                case _ => break
+                            }
+                            if (lastLineBean.codeLine.count(antiSymbol) - lastLineBean.codeLine.count(rightSymbolArr[i]) == 1) {
+                                lastLineBean.codeLine = lastLineBean.codeLine.trimAscii().replace("\n", "") + lineBean.codeLine.trimAscii()
+                                lineBean.isDiscarded = true
+                                break
+                            }
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
             // 去除了对macro宏的逻辑，如果是#开头的宏代码 lineBean的indentLevel还是要设置一下，不然会有问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]

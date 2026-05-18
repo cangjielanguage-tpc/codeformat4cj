@@ -271,6 +271,361 @@ class RustFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
+            // 2.7 处理数组场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.endsWith(";") && 
+                codeStr.replace(" ", "").contains(":[") &&
+                !lineBean.isInMultilineComment && 
+                !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        while (nextLineBean.codeLine.contains("]") && (!nextLineBean.codeLine.contains("[") || nextLineBean.codeLine.indexOf(']').getOrThrow() < nextLineBean.codeLine.indexOf('[').getOrThrow())) {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(nextLineBean.codeLine)
+                            //多行前面有内容 只要隔个一个空格
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            lineBean.codeLine = stringbuilder.toString()
+                            nextLineBean.isDiscarded = true
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                        if (lineBean.codeLine.trimAscii().replace(" ", "").endsWith("=[")) {
+                            var leftBrace = 0
+                            while (!((leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]") == -1) &&
+                            (nextLineBean.codeLine.trimAscii() == "]" || nextLineBean.codeLine.trimAscii() == "];"))) {
+                                leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
+                                nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                                x++
+                                nextLineBean = stateBean.linesList[i + x]
+                            }
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 2.7 处理where场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if (codeStr == "where" && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    // if (i > 0) {
+                    var x = 1
+                    var nextLineBean = stateBean.linesList[i + x]
+                    while (!(nextLineBean.codeLine.trimAscii() == "{")) {
+                        nextLineBean.indentLevel++
+                        x++
+                        nextLineBean = stateBean.linesList[i + x]
+                    }
+                    nextLineBean.indentLevel = lineBean.indentLevel
+                    var leftBrace = 0
+                    x++
+                    nextLineBean = stateBean.linesList[i + x]
+                    while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1) && 
+                    nextLineBean.codeLine.trimAscii().endsWith("}") &&
+                    nextLineBean.codeLine.trimAscii() != "}") {
+                        leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                        nextLineBean.indentLevel++
+                        x++
+                        nextLineBean = stateBean.linesList[i + x]
+                    }
+                    if (nextLineBean.codeLine.trimAscii().replace(" ", "") == "}" && nextLineBean.indentLevel == lineBean.indentLevel) {
+                        continue
+                    }
+                    nextLineBean.indentLevel++
+                    nextLineBean.codeLine = nextLineBean.codeLine.removeSuffix("}")
+                    let newlineBean = LineBean()
+                    newlineBean.codeLine = "}"
+                    newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                    stateBean.linesList.add(newlineBean, at:i + x + 1)
+                }
+            }
+            removediscard(stateBean)
+
+            // 2.7 处理**}场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.endsWith("}") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if (nextLineBean.codeLine.trimAscii().startsWith("=") || nextLineBean.codeLine.trimAscii().startsWith("=>")) {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(nextLineBean.codeLine)
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            nextLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 2.8 处理}\n;场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("}") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if (nextLineBean.codeLine.trimAscii().startsWith(";")) {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(nextLineBean.codeLine)
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            nextLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+            
+            // 2.9 处理{**\n};场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if (nextLineBean.codeLine.trimAscii().endsWith("};")) {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(nextLineBean.codeLine)
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            nextLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 2.10 处理|\n{**\n**};场景
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.trimAscii().endsWith("|") && codeStr.trimAscii().contains("=") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        var x = 1
+                        if (nextLineBean.codeLine.trimAscii() == "{") {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(" ")
+                            stringbuilder.append(nextLineBean.codeLine)
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            lineBean.codeLine = stringbuilder.toString()
+                            nextLineBean.isDiscarded = true
+                            x++
+                        }
+                        var leftBrace = 0
+                        nextLineBean = stateBean.linesList[i + x]
+                        while (!(nextLineBean.codeLine.trimAscii().contains("}") &&
+                        (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
+                        leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                        if (nextLineBean.codeLine.trimAscii().replace(" ", "").startsWith("}") && nextLineBean.indentLevel == lineBean.indentLevel) {
+                            continue
+                        }
+                        nextLineBean.indentLevel++
+                        var codeSplit = nextLineBean.codeLine.trimAscii().split("}", removeEmpty: false)
+                        let newlineBean = LineBean()
+                        newlineBean.codeLine = "}" + codeSplit[codeSplit.size - 1]
+                        nextLineBean.codeLine = nextLineBean.codeLine.replace(newlineBean.codeLine, "")
+                        newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                        stateBean.linesList.add(newlineBean, at:i + x + 1)
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine
+                if (codeStr.endsWith("{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if ((nextLineBean.codeLine.trimAscii().contains("=") || nextLineBean.codeLine.trimAscii().contains("=>")) && 
+                        nextLineBean.codeLine.contains("}") &&
+                        (!nextLineBean.codeLine.contains("{") || nextLineBean.codeLine.indexOf('}').getOrThrow() < nextLineBean.codeLine.indexOf('{').getOrThrow())
+                        ) {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(" ")
+                            stringbuilder.append(nextLineBean.codeLine)
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            nextLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理参数中使用if代码块
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if (codeStr.endsWith("=") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 2) {
+                        var nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if (nextLineBean.codeLine.trimAscii().startsWith("if ") && stateBean.linesList[i + 2].codeLine.trimAscii() == "{") {
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            //多行前面有内容 只要隔个一个空格
+                            stringbuilder.append(lineBean.codeLine.trimAscii())
+                            stringbuilder.append(" ")
+                            stringbuilder.append(nextLineBean.codeLine.replace("\n", ""))
+                            stringbuilder.append("{")
+                            // 代码后面直接书写'}'缺失一个'\n'的场景，补充一个换行符 '}' -> '\n}' 
+                            lineBean.codeLine = stringbuilder.toString()
+                            nextLineBean.isDiscarded = true
+                            stateBean.linesList[i + 2].isDiscarded = true
+                            var x = 3
+                            var leftBrace = 0
+                            nextLineBean = stateBean.linesList[i + x]
+                            while (!((leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1) && nextLineBean.codeLine.trimAscii().endsWith("}"))) {
+                                leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                x++
+                                nextLineBean = stateBean.linesList[i + x]
+                            }
+                            if (!(nextLineBean.codeLine.trimAscii() == "}")) {
+                                nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                                nextLineBean.codeLine = nextLineBean.codeLine.trimAscii().removeSuffix("}")
+                            } else {
+                                nextLineBean.isDiscarded = true
+                            }
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                            if (nextLineBean.codeLine.trimAscii() == "else") {
+                                nextLineBean.codeLine = "} else {"
+                                nextLineBean.indentLevel = stateBean.linesList[i + x - 1].indentLevel - 1
+                                x++
+                                nextLineBean = stateBean.linesList[i + x]
+                                leftBrace = 0
+                                if (nextLineBean.codeLine.trimAscii().startsWith("{")) {
+                                    nextLineBean.codeLine = nextLineBean.codeLine.trimAscii()[1..]
+                                    while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
+                                        leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                        x++
+                                        nextLineBean = stateBean.linesList[i + x]
+                                    }
+                                    if ((nextLineBean.codeLine.trimAscii().replace(" ", "") == "}" || nextLineBean.codeLine.trimAscii().replace(" ", "") == "};") && nextLineBean.indentLevel == lineBean.indentLevel) {
+                                        continue
+                                    }
+                                    nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                                    var tailCodeArr = nextLineBean.codeLine.split("}", removeEmpty: false)
+                                    nextLineBean.codeLine = nextLineBean.codeLine.removeSuffix("}" + tailCodeArr[tailCodeArr.size-1])
+                                    let newlineBean = LineBean()
+                                    newlineBean.codeLine = "}" + tailCodeArr[tailCodeArr.size-1]
+                                    newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                                    stateBean.linesList.add(newlineBean, at:i + x + 1)
+                                }
+                            } else if (nextLineBean.codeLine.trimAscii().startsWith("else {")) {
+                                var newlineBean = LineBean()
+                                newlineBean.codeLine = nextLineBean.codeLine.trimAscii()[7..]
+                                nextLineBean.codeLine = "} else {"
+                                nextLineBean.indentLevel = stateBean.linesList[i + x - 1].indentLevel - 1
+                                newlineBean.indentLevel = stateBean.linesList[i + x - 1].indentLevel - 1
+                                stateBean.linesList.add(newlineBean, at:i + x + 1)
+                                x++
+                                nextLineBean = stateBean.linesList[i + x]
+                                leftBrace = 0
+                                while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
+                                    leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                    x++
+                                    nextLineBean = stateBean.linesList[i + x]
+                                }
+                                if ((nextLineBean.codeLine.trimAscii().replace(" ", "") == "}" || nextLineBean.codeLine.trimAscii().replace(" ", "") == "};") && nextLineBean.indentLevel == lineBean.indentLevel) {
+                                    continue
+                                }
+                                nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                                var tailCodeArr = nextLineBean.codeLine.split("}", removeEmpty: false)
+                                nextLineBean.codeLine = nextLineBean.codeLine.removeSuffix("}" + tailCodeArr[tailCodeArr.size-1])
+                                newlineBean = LineBean()
+                                newlineBean.codeLine = "}" + tailCodeArr[tailCodeArr.size-1]
+                                newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                                stateBean.linesList.add(newlineBean, at:i + x + 1)
+                            }
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            // 处理普通if代码块
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if (codeStr.startsWith("if") && !(i > 0 && stateBean.linesList[i - 1].codeLine.trimAscii().endsWith("=")) && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var x = 1
+                        var leftBrace = 0
+                        var nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        while (!(nextLineBean.codeLine.trimAscii().endsWith("}") && (leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1))) {
+                            leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                        }
+                        if (nextLineBean.codeLine.trimAscii().replace(" ", "") == "}") {
+                            continue
+                        }
+                        nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                        var tailCodeArr = nextLineBean.codeLine.split("}", removeEmpty: false)
+                        nextLineBean.codeLine = nextLineBean.codeLine.removeSuffix("}" + tailCodeArr[tailCodeArr.size-1])
+                        let newlineBean = LineBean()
+                        newlineBean.codeLine = "}" + tailCodeArr[tailCodeArr.size-1]
+                        newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                        stateBean.linesList.add(newlineBean, at:i + x + 1)
+                        x = x + 2
+                        nextLineBean = stateBean.linesList[i + x]
+                        if (nextLineBean.codeLine.trimAscii() == "else {") {
+                            stateBean.linesList[i + x - 1].isDiscarded = true
+                            nextLineBean.codeLine = nextLineBean.codeLine.trimAscii().replace("else {", "} else {")
+                            leftBrace = 0
+                            x++
+                            nextLineBean = stateBean.linesList[i + x]
+                            while (!(nextLineBean.codeLine.trimAscii().endsWith("}") && (leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1))) {
+                                leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                x++
+                                nextLineBean = stateBean.linesList[i + x]
+                            }
+                            if (nextLineBean.codeLine.trimAscii().replace(" ", "") == "}") {
+                                continue
+                            }
+                            nextLineBean.indentLevel = nextLineBean.indentLevel + 1
+                            var tailCodeArr = nextLineBean.codeLine.split("}", removeEmpty: false)
+                            nextLineBean.codeLine = nextLineBean.codeLine.removeSuffix("}" + tailCodeArr[tailCodeArr.size-1])
+                            let newlineBean = LineBean()
+                            newlineBean.codeLine = "}" + tailCodeArr[tailCodeArr.size-1]
+                            newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                            stateBean.linesList.add(newlineBean, at:i + x + 1)
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()

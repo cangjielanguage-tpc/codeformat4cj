@@ -416,6 +416,50 @@ public async Task LogAsync(string message)
 {
 await Task.Delay(100); // 模拟异步操作
 Console.WriteLine($"[异步日志] {message}");
+int[,] matrix = {
+{ 1,  2,  3,  4,  5 },
+{ 6,  7,  8,  9, 10 },
+{11, 12, 13, 14, 15 },
+{16, 17, 18, 19, 20 },
+{21, 22, 23, 24, 25 }
+};
+// ---------- 控制流 ----------
+Console.WriteLine("\n--- 2. 控制流 ---");
+// if-else
+if (count > 10)
+Console.WriteLine("count > 10");
+else
+Console.WriteLine("count <= 10");
+// for / foreach / while / do-while
+for (int i = 0; i < 3; i++) Console.Write($"{i} ");
+Console.WriteLine();
+
+var numbers = new List<int> { 1, 2, 3 };
+foreach (var num in numbers) Console.Write($"{num} ");
+Console.WriteLine();
+// 传统 switch 语句（含 goto 演示）
+switch (count)
+{
+case 42:
+Console.WriteLine("count is 42");
+goto case 100;
+case 100:
+Console.WriteLine("count was 42 but goto 100");
+break;
+default:
+Console.WriteLine("other");
+break;
+}
+// ---------- 类、结构、记录 ----------
+Console.WriteLine("\n--- 5. 类、结构、记录 ---");
+PersonRecord person = new("John", "Doe");
+PersonRecord person2 = person with { FirstName = "Jane" }; // with 表达式
+Console.WriteLine($"Record person: {person}, modified: {person2}");
+
+Vector v1 = new(3, 4);
+Vector v2 = new(1, 2);
+Vector sum = v1 + v2;
+Console.WriteLine($"{v1.Greet()} + {v2.Greet()} = {sum.Greet()}");
 }
 }
 "#

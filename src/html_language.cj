@@ -126,9 +126,9 @@ class HtmlFormat <: GeneralProcessing {
                 stateBean.perLineOutput.append(currChar)
 
                 // 处理HTML注释
-                if (currChar == r'-' && stateBean.lastChar == r'!' && !stateBean.isInString) {
-                    if (stateBean.currentIndex >= 2 && i[stateBean.currentIndex - 2] == r'<') {
-                        var str = stateBean.perLineOutput.toString().removeSuffix("<!-")
+                if (currChar == r'-' && stateBean.lastChar == r'-' && !stateBean.isInString) {
+                    if (stateBean.currentIndex >= 2 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
+                        var str = stateBean.perLineOutput.toString().removeSuffix("<!--")
                         if (str.trimAscii().size > 0) {
                             dealWithMultiLineComment(stateBean, str)
                         } else {
@@ -261,7 +261,7 @@ class HtmlFormat <: GeneralProcessing {
             // <p>场景修改
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
-                let codeStr = lineBean.codeLine.trimAscii()
+                let codeStr = lineBean.codeLine
                 if (codeStr.endsWith(">") && codeStr.startsWith("<") && !lineBean.isInMultilineComment) {
                     var tagHeader = ""
                     if (codeStr.contains(" ")) {
@@ -275,7 +275,7 @@ class HtmlFormat <: GeneralProcessing {
                         var x = 1
                         var nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
                         while (!nextLineBeanStr.endsWith("</p>")) {
-                            stringbuilder.append(nextLineBeanStr.trimAscii())
+                            stringbuilder.append(stateBean.linesList[i + x].codeLine)
                             stateBean.linesList[i + x].isDiscarded = true
                             x++
                             if (i + x >= stateBean.linesList.size) {
@@ -283,7 +283,7 @@ class HtmlFormat <: GeneralProcessing {
                             }
                             nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
                         }
-                        stringbuilder.append(nextLineBeanStr.trimAscii())
+                        stringbuilder.append(stateBean.linesList[i + x].codeLine)
                         lineBean.codeLine = stringbuilder.toString()
                         stateBean.linesList[i + x].isDiscarded = true
                         if (!(nextLineBeanStr == "</p>")) {
@@ -319,7 +319,7 @@ class HtmlFormat <: GeneralProcessing {
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
-                if (codeStr.startsWith("<html ") && !lineBean.isInMultilineComment) {
+                if (codeStr.startsWith("<html") && !lineBean.isInMultilineComment) {
                     if (i > 0) {
                         var x = 1
                         var nextLineBean: LineBean = stateBean.linesList[i + x]
@@ -332,6 +332,37 @@ class HtmlFormat <: GeneralProcessing {
                             nextLineBean = stateBean.linesList[i + x]
                         }
                     }
+                }
+            }
+            removediscard(stateBean)
+            //html标签内内容需要缩进
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                var x = 1
+                while (lineBean.codeLine.trimAscii().endsWith("<div>") && !lineBean.isInMultilineComment) {
+                    if (i < stateBean.linesList.size - 1) {
+                        var nextLineBean: LineBean = stateBean.linesList[i + x]
+                        if (!nextLineBean.codeLine.trimAscii().startsWith("<")) {
+                            lineBean.codeLine = lineBean.codeLine.trimAscii() + nextLineBean.codeLine.trimAscii()
+                            nextLineBean.isDiscarded = true
+                        } else {
+                            break
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+            //html标签内内容需要缩进
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                if (lineBean.codeLine.trimAscii() == "<!--" && lineBean.isInMultilineComment) {
+                    var x = 1
+                    while (!(i < stateBean.linesList.size - x && stateBean.linesList[i + x].codeLine.trimAscii().endsWith("-->"))) {
+                        stateBean.linesList[i + x].indentLevel = 0
+                        x++
+                    }
+                    stateBean.linesList[i + x].indentLevel = 0
                 }
             }
             removediscard(stateBean)
