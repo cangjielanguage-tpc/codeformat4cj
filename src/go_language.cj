@@ -276,7 +276,7 @@ class GoFormat <: GeneralProcessing {
             removeOnlyChangeLine(stateBean)
 
             //这里处理如果}前面还有内容就和上一行连在一起解决数组中的{}问题
-            //在go语言中这种情况要改下
+            //在go语言中这种情况要改下 go可以没分号
 
             let tempArr: ArrayList<LineBean> = ArrayList<LineBean>()
 
@@ -300,20 +300,18 @@ class GoFormat <: GeneralProcessing {
             }
             stateBean.linesList = tempArr
             //去除一次废弃内容
-            //这里修改}后面如果是；就连在一起
+
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (!lineBean.isSingleLine) {
-                    if ((lineBean.codeLine.trimAscii() == ";" || lineBean.codeLine.trimAscii() == ")" ||
-                        lineBean.codeLine.trimAscii() == "()") && !lineBean.isInMultilineComment &&
-                        !lineBean.isInSinglelineComment) {
-                        //如果当前行是单行注释，那就看他有没有上一行
+                    if ((lineBean.codeLine.trimAscii() == ";" || lineBean.codeLine.trimAscii() == "{" || 
+                    lineBean.codeLine.trimAscii() == "," || lineBean.codeLine.trimAscii() == "()") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                        //如果当前行是这些字符串就和上一行连在一起
                         if (i > 0) {
-                            //有上一行，看上一行的结束是不是\n
                             let lastLineBean: LineBean = stateBean.linesList[i - 1]
                             //如果这样的话，这一行的内容要加到上一行的后面
                             let stringbuilder: StringBuilder = StringBuilder()
-                            stringbuilder.append(lastLineBean.codeLine)
+                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
                             stringbuilder.append(lineBean.codeLine)
                             lastLineBean.codeLine = stringbuilder.toString()
                             lineBean.isDiscarded = true
@@ -390,6 +388,82 @@ class GoFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
+
+            //处理单行只有)但是上一行只有}结尾的情况
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
+                if (codeStr == ")" && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i > 0) {
+                        //有上一行，看上一行的结束是不是\n
+                        let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        if (lastLineBean.codeLine.trimAscii() =="}") {
+                            //上一行以}结尾那么合并这两行
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lastLineBean.codeLine)
+                            stringbuilder.append(lineBean.codeLine)
+                            lastLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)
+
+
+             //处理interface{}=问题   
+             for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
+                if (codeStr.trimAscii() == "}" && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i > 0) {
+                        //有上一行，看上一行的结束是不是\n
+                        let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        if (lastLineBean.codeLine.trimAscii().endsWith("interface{")) {
+                            //上一行只有}那么合并这两行
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
+                            stringbuilder.append(lineBean.codeLine)
+                            lastLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)    
+
+            //处理interface{}=问题   
+             for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
+                if (codeStr.startsWith("=") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    //如果当前行是单行注释，那就看他有没有上一行
+                    if (i > 0) {
+                        //有上一行，看上一行的结束是不是\n
+                        let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                        if (lastLineBean.codeLine.trimAscii().endsWith("interface{}")) {
+                            //上一行只有}那么合并这两行
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
+                            stringbuilder.append(lineBean.codeLine)
+                            lastLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            removediscard(stateBean)  
+
+
+
+
+
+
             //去除了对macro宏的逻辑，如果是#开头的宏代码 lineBean的indentLevel还是要设置一下，不然会有问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
@@ -398,6 +472,102 @@ class GoFormat <: GeneralProcessing {
                     lineBean.indentLevel = 0
                 }
             }
+
+                //巧妙处理swicth的缩进
+
+                var inSwitchBlock = false
+                var needIndent = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii()
+
+                    // 1. 进入 switch {
+                    if (t.startsWith("switch ") && t.contains("{")) {
+                        inSwitchBlock = true
+                        needIndent = false
+                    }
+
+                    // 2. 离开 switch }
+                    if (t == "}" && inSwitchBlock) {
+                        inSwitchBlock = false
+                        needIndent = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inSwitchBlock) {
+                        if (t.startsWith("case ") || t.startsWith("default")) {
+                            // case / default → 缩进 1 级
+                            //line.indentLevel = line.indentLevel+1
+                            needIndent = true
+                        } else if (needIndent) {
+                            // case 下面一行 → 再缩进 1 级（总共 2 级）
+                            line.indentLevel = line.indentLevel+1
+                        }
+                    }
+                }
+
+
+             //巧妙处理array
+
+                var inArrayBlock = false
+                var strBuilder:StringBuilder = StringBuilder()
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    // 1. 进入 switch {
+                    if (t.endsWith("]int{")||t.endsWith("]string{")||t.endsWith("]float64{")||t.contains("]int{//")||t.contains("]string{//")||t.contains("]float64{//")) {
+                        inArrayBlock = true
+                    }
+
+                    // 2. 离开 switch }
+                    if ((t == "}" || t.contains("}//") || t.contains("}/*")) && inArrayBlock) {
+                        strBuilder.append(line.codeLine)
+                        line.codeLine = strBuilder.toString()
+                        inArrayBlock = false
+                        strBuilder = StringBuilder()
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inArrayBlock) {
+                        line.isDiscarded = true
+                        strBuilder.append(line.codeLine.trimAscii())
+                    }
+                }
+
+                removediscard(stateBean)
+
+
+
+               //处理分组声明
+                var isInFactoredDeclaration = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    // 1. 进入 switch {
+                    if (t.startsWith("const(") || t.startsWith("var(")) {
+                        isInFactoredDeclaration = true
+                        continue
+                    }
+
+                    // 2. 离开 switch }
+                    if (t == ")" && isInFactoredDeclaration) {
+                        isInFactoredDeclaration = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (isInFactoredDeclaration) {
+                        line.indentLevel = line.indentLevel+1
+                    }
+                }
+
+
+
+
+
 
             // 处理`符号的多行字符串，防止使用缩进可能导致源码被修改
             var x = 1
@@ -418,12 +588,13 @@ class GoFormat <: GeneralProcessing {
                 }
                 // 过滤使用了转义的`符号
                 if (lineBean.codeLine.contains("`") && 
-                !handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow())) {
+                !(lineBean.codeLine.trimAscii() == "`") &&
+                !handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)) {
                     continue
                 }
                 var nextLineBean = stateBean.linesList[i + x]
                 while (!(nextLineBean.codeLine.trimAscii().endsWith("`") &&
-                handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow()))) {
+                (lineBean.codeLine.trimAscii() == "`" || handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)))) {
                     x++
                     nextLineBean = stateBean.linesList[i + x]
                 }
