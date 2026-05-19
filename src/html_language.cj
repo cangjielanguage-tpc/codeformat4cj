@@ -22,7 +22,7 @@ class HtmlFormat <: GeneralProcessing {
                 if (stateBean.currentIndex == notNullChar.size - 1) {
                     break
                 }
-                stateBean.currentIndex++
+                stateBean.currentIndex = stateBean.currentIndex + 1
                 stateBean.perLineOutput.append(currChar)
                 lastLastChar = lastChar
                 lastChar = currChar
@@ -335,7 +335,7 @@ class HtmlFormat <: GeneralProcessing {
                 }
             }
             removediscard(stateBean)
-            //html标签内内容需要缩进
+            //<div>标签内内容修改
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 var x = 1
@@ -345,6 +345,7 @@ class HtmlFormat <: GeneralProcessing {
                         if (!nextLineBean.codeLine.trimAscii().startsWith("<")) {
                             lineBean.codeLine = lineBean.codeLine.trimAscii() + nextLineBean.codeLine.trimAscii()
                             nextLineBean.isDiscarded = true
+                            x++
                         } else {
                             break
                         }
@@ -353,7 +354,7 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            //html标签内内容需要缩进
+            //注释为0内内容需要缩进
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.codeLine.trimAscii() == "<!--" && lineBean.isInMultilineComment) {
