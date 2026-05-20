@@ -74,9 +74,10 @@ class StateBean {
     var isHasCreateTableRight:Bool = false //给createTable后面的,不要换行
     var isFirstCreateTableLeft:Bool = true //给createTable后面的,不要换行
     var isFirstCreateTableRight:Bool = true //给createTable后面的,不要换行
-    var isInAlertTable:Bool = true //给alertTable后面的缩进用
+    var isInAlterTable:Bool = true //给alertTable后面的缩进用
     var isInSubSelect:Bool = false //给alertTable后面的缩进用
     var isInSubSelectCount:Int64 = 0 //给alertTable后面的缩进用 这个记录左括号个数
     var isJustTurnSubSelectFalse:Bool = false //是不是刚刚走出subselect
     var subSelectHasInAndOr:Bool=false // subselect第一次进where如果没有and or的话要两层 然后碰到and or就只要一层够了 where退出的时候这个也要重置
+    var isInUnionAll :Bool = false //给innerjoin缩进用
 }

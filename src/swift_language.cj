@@ -397,6 +397,9 @@ class SwiftFormat <: GeneralProcessing {
                     leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         x++
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         nextLineBean = stateBean.linesList[i + x]
                     }
                     if (nextLineBean.codeLine.trimAscii().replace(" ", "") == "}" && nextLineBean.indentLevel == lineBean.indentLevel) {
