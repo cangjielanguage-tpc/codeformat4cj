@@ -31,7 +31,7 @@ class HtmlFormat <: GeneralProcessing {
         }
 
         let lineEndIndex: Int64 = stateBean.currentIndex + 1
-        var lineCodeAll: String = String(notNullChar.slice(lineStartIndex - 3, lineEndIndex - lineStartIndex + 3 + 1))
+        var lineCodeAll: String = String(notNullChar.slice(lineStartIndex - 3, lineEndIndex - lineStartIndex + 3))
         lineCodeAll = perStr + lineCodeAll
         let lineCodeList: Array<String> = lineCodeAll.split("\n")
         for (index in 0..lineCodeList.size) {
@@ -87,12 +87,12 @@ class HtmlFormat <: GeneralProcessing {
 
     // 判断是否为开始标签
     func isStartTag(tagContent: String): Bool {
-        return tagContent.startsWith("<") && !tagContent.startsWith("</") && !tagContent.startsWith("<!")
+        return tagContent.contains("<") && !tagContent.contains("</") && !tagContent.contains("<!") && !tagContent.contains("< ")
     }
 
     // 判断是否为结束标签
     func isEndTag(tagContent: String): Bool {
-        return tagContent.startsWith("</")
+        return tagContent.contains("</")
     }
 
     // 判断是否为自闭合标签
@@ -137,8 +137,6 @@ class HtmlFormat <: GeneralProcessing {
                         continue
                     }
                 }
-
-                dealWithString(stateBean)
 
                 // 处理大括号（用于script/style标签内）
                 if (currChar == r'{' && !stateBean.isInString && !stateBean.isInMacro) {
@@ -249,8 +247,15 @@ class HtmlFormat <: GeneralProcessing {
                             if (nextLineBean.codeLine.trimAscii() == tagHeader.replace("<", "</")) {
                                 continue
                             }
-                            for (j in i + 2..stateBean.linesList.size) {
-                                stateBean.linesList[j].indentLevel--
+                        } else if (nextLineBean.codeLine.contains("<") && nextLineBean.codeLine.trimAscii().endsWith(">")) {
+                            var x = 1
+                            while (!stateBean.linesList[i + x].codeLine.trimAscii().startsWith("<")) {
+                                let stringbuilder: StringBuilder = StringBuilder()
+                                stringbuilder.append(lineBean.codeLine)
+                                stringbuilder.append(stateBean.linesList[i + x].codeLine)
+                                lineBean.codeLine = stringbuilder.toString()
+                                stateBean.linesList[i + x].isDiscarded = true
+                                x++
                             }
                         }
                     }
@@ -269,7 +274,7 @@ class HtmlFormat <: GeneralProcessing {
                     } else {
                         tagHeader = codeStr
                     }
-                    if (tagHeader == "<p>") {
+                    if ((tagHeader == "<p>" || codeStr.trimAscii().startsWith("<p>")) && !codeStr.contains("</p>")) {
                         let stringbuilder: StringBuilder = StringBuilder()
                         stringbuilder.append(codeStr)
                         var x = 1
@@ -286,11 +291,6 @@ class HtmlFormat <: GeneralProcessing {
                         stringbuilder.append(stateBean.linesList[i + x].codeLine)
                         lineBean.codeLine = stringbuilder.toString()
                         stateBean.linesList[i + x].isDiscarded = true
-                        if (!(nextLineBeanStr == "</p>")) {
-                            for (j in i + 2..stateBean.linesList.size) {
-                                stateBean.linesList[j].indentLevel--
-                            }
-                        }
                     }
                 }
             }
@@ -338,6 +338,9 @@ class HtmlFormat <: GeneralProcessing {
             //<div>标签内内容修改
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
+                if (!lineBean.codeLine.trimAscii().endsWith("<div>") || lineBean.isDiscarded == true) {
+                    continue
+                }
                 var x = 1
                 while (lineBean.codeLine.trimAscii().endsWith("<div>") && !lineBean.isInMultilineComment) {
                     if (i < stateBean.linesList.size - 1) {
