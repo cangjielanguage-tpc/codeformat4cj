@@ -4,5 +4,5 @@ WHERE status=1
     AND type=1
     OR type = 2
     AND create_time BETWEEN '2024-01-01' AND '2025-01-01'
-ORDER BY id desc
+ORDER BY id DESC
 LIMIT 15;
