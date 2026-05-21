@@ -754,9 +754,9 @@ class RustFormat <: GeneralProcessing {
             let startIdx = result.indexOf("{").getOrThrow()
             let endIdx = result.indexOf("}").getOrThrow()
             if (startIdx >= 0 && endIdx > startIdx) {
-                let prefix = result.substring(0, startIdx + 1)
-                let content = result.substring(startIdx + 1, endIdx)
-                let suffix = result.substring(endIdx)
+                let prefix = result[0..startIdx + 1]
+                let content = result[startIdx + 1..endIdx]
+                let suffix = result[endIdx..]
                 
                 // 在逗号后添加空格（如果没有）
                 var normalizedContent = content.replace(",", ", ")
@@ -831,9 +831,9 @@ class RustFormat <: GeneralProcessing {
             let startIdx = result.indexOf("(").getOrThrow()
             let endIdx = result.indexOf(")").getOrThrow()
             if (startIdx >= 0 && endIdx > startIdx) {
-                let prefix = result.substring(0, startIdx + 1)
-                let params = result.substring(startIdx + 1, endIdx)
-                let suffix = result.substring(endIdx)
+                let prefix = result[0..startIdx + 1]
+                let params = result[startIdx + 1..endIdx]
+                let suffix = result[endIdx..]
                 
                 // 规范化参数列表
                 var normalizedParams = params.replace(",", ", ")
@@ -885,9 +885,9 @@ class RustFormat <: GeneralProcessing {
             let firstPipe = result.indexOf("|").getOrThrow()
             let secondPipe = result.indexOf("|", firstPipe + 1).getOrThrow()
             if (firstPipe >= 0 && secondPipe > firstPipe) {
-                let beforeClosure = result.substring(0, firstPipe).trimAscii()
-                let closureParams = result.substring(firstPipe, secondPipe + 1).trimAscii()
-                let closureBody = result.substring(secondPipe + 1).trimAscii()
+                let beforeClosure = result[0..firstPipe].trimAscii()
+                let closureParams = result[firstPipe..secondPipe + 1].trimAscii()
+                let closureBody = result[secondPipe + 1..].trimAscii()
                 
                 // 规范化闭包主体
                 var normalizedBody = closureBody.replace("  ", " ")
