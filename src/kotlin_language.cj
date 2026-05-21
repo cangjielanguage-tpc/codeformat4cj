@@ -230,7 +230,7 @@ class KotlinFormat <: GeneralProcessing {
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (!lineBean.isSingleLine) {
-                    if ((lineBean.codeLine.trimAscii() == ";" || lineBean.codeLine.trimAscii() == ")" ||
+                    if ((lineBean.codeLine.trimAscii() == ";" ||
                         lineBean.codeLine.trimAscii() == "()") && !lineBean.isInMultilineComment &&
                         !lineBean.isInSinglelineComment) {
                         //如果当前行是单行注释，那就看他有没有上一行
@@ -339,37 +339,36 @@ class KotlinFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理`符号的多行字符串，防止使用缩进可能导致源码被修改
-            var x = 1
-            for (i in 0..stateBean.linesList.size) {
-                let lineBean: LineBean = stateBean.linesList[i]
-                if (x != 1) {
-                    lineBean.indentLevel = 0
-                    x--
-                    continue
+
+            
+                 //巧妙处理二维数组
+
+                var inInDoubleArray = false
+
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    // 1. 进入 switch {
+                    if (t.endsWith("=arrayOf(") || t.contains("=arrayOf(//") || t.contains("=arrayOf(/*")) {
+                        inInDoubleArray = true
+                        continue
+                    }
+
+                    // 2. 离开 switch }
+                    if ((t == ")" || t.startsWith(")//") || t.startsWith(")/*")) && inInDoubleArray) {
+                        inInDoubleArray = false
+                    }
+
+                    // 3. 只在 switch 内部生效
+                    if (inInDoubleArray) {
+                        line.indentLevel = line.indentLevel+1
+                    }
                 }
-                // 过滤没使用`符号字符串
-                if (!lineBean.codeLine.contains("\"\"\"")) {
-                    continue
-                }
-                // 过滤使用`的单行字符串
-                if (lineBean.codeLine.contains("\"\"\"") && lineBean.codeLine.trimAscii().endsWith("\"\"\"") && lineBean.codeLine.count("\"\"\"") > 1) {
-                    continue
-                }
-                // 过滤使用了转义的`符号
-                if (lineBean.codeLine.contains("\"\"\"") && 
-                !(lineBean.codeLine.trimAscii() == "\"\"\"") &&
-                !(handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("\"\"\"").getOrThrow() - 1))) {
-                    continue
-                }
-                var nextLineBean = stateBean.linesList[i + x]
-                while (!(nextLineBean.codeLine.trimAscii().endsWith("\"\"\"") &&
-                (lineBean.codeLine.trimAscii() == "\"\"\"" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("\"\"\"").getOrThrow() - 1)))) {
-                    x++
-                    nextLineBean = stateBean.linesList[i + x]
-                }
-                x++
-            }
+
+
+
+
 
             //获得最终的list
             let usefulList: ArrayList<LineBean> = stateBean.linesList
