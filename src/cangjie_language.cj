@@ -397,6 +397,9 @@ class CangjieFormat <: GeneralProcessing {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
                             nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                     }
@@ -439,6 +442,9 @@ class CangjieFormat <: GeneralProcessing {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("(") - nextLineBean.codeLine.count(")")
                             nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                     }
@@ -480,6 +486,9 @@ class CangjieFormat <: GeneralProcessing {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
                             nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                         // 只有一行，加到上一行末尾

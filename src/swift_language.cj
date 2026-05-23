@@ -371,13 +371,13 @@ class SwiftFormat <: GeneralProcessing {
                     if (i > 0) {
                         //有上一行，看上一行的结束是不是\n
                         let lastLineBean: LineBean = stateBean.linesList[i - 1]
-                        if (lastLineBean.codeLine.trimAscii().endsWith("}")) {
+                        if (lastLineBean.codeLine.trimAscii() == "}") {
                             //如果这样的话，这一行的内容要加到上一行的后面
                             let stringbuilder: StringBuilder = StringBuilder()
                             stringbuilder.append(lastLineBean.codeLine)
                             stringbuilder.append(lineBean.codeLine)
-                            lastLineBean.codeLine = stringbuilder.toString().replace("\n", "")
-                            lineBean.isDiscarded = true
+                            lineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                            lastLineBean.isDiscarded = true
                         }
                     }
                 }
@@ -410,6 +410,9 @@ class SwiftFormat <: GeneralProcessing {
                     let newlineBean = LineBean()
                     newlineBean.codeLine = "}"
                     newlineBean.indentLevel = nextLineBean.indentLevel - 1
+                    if (i + x + 1 >= stateBean.linesList.size) {
+                        break
+                    }
                     stateBean.linesList.add(newlineBean, at:i + x + 1)
                 }
             }
@@ -426,6 +429,9 @@ class SwiftFormat <: GeneralProcessing {
                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         x++
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         if(!(nextLineBean.codeLine.trimAscii().startsWith("case") || nextLineBean.codeLine.trimAscii().startsWith("default"))) {
                             nextLineBean.indentLevel++
                         }
@@ -456,6 +462,9 @@ class SwiftFormat <: GeneralProcessing {
                             lineBean.codeLine = stringbuilder.toString()
                             nextLineBean.isDiscarded = true
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                         if (lineBean.codeLine.trimAscii().replace(" ", "").endsWith("=[")) {
@@ -465,6 +474,9 @@ class SwiftFormat <: GeneralProcessing {
                                 leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
                                 nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                                 x++
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 nextLineBean = stateBean.linesList[i + x]
                             }
                         }

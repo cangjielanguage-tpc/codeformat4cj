@@ -164,7 +164,7 @@ class DartFormat <: GeneralProcessing {
                 }
 
                 // 处理注解（@）
-                if (currChar == r'@' && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor &&
+                if (currChar == r'@' && (stateBean.lastChar == r'\n' || stateBean.lastChar == r' ') && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor &&
                     !stateBean.isInBackQuote) {
                     dealWithMacro(stateBean)
                     continue
@@ -338,18 +338,16 @@ class DartFormat <: GeneralProcessing {
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
-                if ((codeStr.endsWith("];") || codeStr.endsWith("]")) && stateBean.linesList[i - 1].codeLine.contains("[") && !codeStr.contains("[") &&
+                if ((codeStr.endsWith("];") || codeStr.endsWith("]")) && !codeStr.contains("[") && i > 0 && stateBean.linesList[i - 1].codeLine.contains("[") &&
                     !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
-                    if (i > 0) {
-                        let lastLineBean: LineBean = stateBean.linesList[i - 1]
-                        if (lastLineBean.codeLine.trimAscii().endsWith(",")) {
-                            // 上一行以逗号结束，合并这两行
-                            let stringbuilder: StringBuilder = StringBuilder()
-                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
-                            stringbuilder.append(lineBean.codeLine.trimAscii())
-                            lastLineBean.codeLine = stringbuilder.toString().replace("\n", "")
-                            lineBean.isDiscarded = true
-                        }
+                    let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                    if (lastLineBean.codeLine.trimAscii().endsWith(",")) {
+                        // 上一行以逗号结束，合并这两行
+                        let stringbuilder: StringBuilder = StringBuilder()
+                        stringbuilder.append(lastLineBean.codeLine.trimAscii())
+                        stringbuilder.append(lineBean.codeLine.trimAscii())
+                        lastLineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                        lineBean.isDiscarded = true
                     }
                 }
             }
@@ -473,6 +471,9 @@ class DartFormat <: GeneralProcessing {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
                             nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                     }
@@ -493,6 +494,9 @@ class DartFormat <: GeneralProcessing {
                         x++
                         if(!(nextLineBean.codeLine.trimAscii().startsWith("case") || nextLineBean.codeLine.trimAscii().startsWith("default") || nextLineBean.codeLine.trimAscii().endsWith(":"))) {
                             nextLineBean.indentLevel++
+                        }
+                        if (i + x >= stateBean.linesList.size) {
+                            break
                         }
                         nextLineBean = stateBean.linesList[i + x]
                     }

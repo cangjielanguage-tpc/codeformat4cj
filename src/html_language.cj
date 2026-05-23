@@ -250,6 +250,9 @@ class HtmlFormat <: GeneralProcessing {
                         } else if (nextLineBean.codeLine.contains("<") && nextLineBean.codeLine.trimAscii().endsWith(">")) {
                             var x = 1
                             while (!stateBean.linesList[i + x].codeLine.trimAscii().startsWith("<")) {
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 let stringbuilder: StringBuilder = StringBuilder()
                                 stringbuilder.append(lineBean.codeLine)
                                 stringbuilder.append(stateBean.linesList[i + x].codeLine)
@@ -344,6 +347,9 @@ class HtmlFormat <: GeneralProcessing {
                 var x = 1
                 while (lineBean.codeLine.trimAscii().endsWith("<div>") && !lineBean.isInMultilineComment) {
                     if (i < stateBean.linesList.size - 1) {
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         var nextLineBean: LineBean = stateBean.linesList[i + x]
                         if (!nextLineBean.codeLine.trimAscii().startsWith("<")) {
                             lineBean.codeLine = lineBean.codeLine.trimAscii() + nextLineBean.codeLine.trimAscii()
@@ -363,6 +369,9 @@ class HtmlFormat <: GeneralProcessing {
                 if (lineBean.codeLine.trimAscii() == "<!--" && lineBean.isInMultilineComment) {
                     var x = 1
                     while (!(i < stateBean.linesList.size - x && stateBean.linesList[i + x].codeLine.trimAscii().endsWith("-->"))) {
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         stateBean.linesList[i + x].indentLevel = 0
                         x++
                     }
