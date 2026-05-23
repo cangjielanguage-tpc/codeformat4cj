@@ -304,7 +304,7 @@ class GoFormat <: GeneralProcessing {
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (!lineBean.isSingleLine) {
-                    if ((lineBean.codeLine.trimAscii() == ";" || lineBean.codeLine.trimAscii() == "{" || 
+                    if ((lineBean.codeLine.trimAscii() == ";" ||
                     lineBean.codeLine.trimAscii() == "," || lineBean.codeLine.trimAscii() == "()") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                         //如果当前行是这些字符串就和上一行连在一起
                         if (i > 0) {
@@ -516,12 +516,13 @@ class GoFormat <: GeneralProcessing {
                     let line = stateBean.linesList[i]
                     let t = line.codeLine.trimAscii().replace(" ","")
 
-                    // 1. 进入 switch {
                     if (t.endsWith("]int{")||t.endsWith("]string{")||t.endsWith("]float64{")||t.contains("]int{//")||t.contains("]string{//")||t.contains("]float64{//")) {
-                        inArrayBlock = true
+                        if(!(t.contains("][") || t.contains("] ["))){
+                            inArrayBlock = true
+                        }
                     }
 
-                    // 2. 离开 switch }
+
                     if ((t == "}" || t.contains("}//") || t.contains("}/*")) && inArrayBlock) {
                         strBuilder.append(line.codeLine)
                         line.codeLine = strBuilder.toString()
@@ -529,10 +530,55 @@ class GoFormat <: GeneralProcessing {
                         strBuilder = StringBuilder()
                     }
 
-                    // 3. 只在 switch 内部生效
                     if (inArrayBlock) {
                         line.isDiscarded = true
                         strBuilder.append(line.codeLine.trimAscii())
+                    }
+                }
+
+                removediscard(stateBean)
+
+
+
+
+                 //巧妙处理Doublearray
+
+                var inDoubleArrayBlock = false
+                var SubArrayBlock = false
+                strBuilder = StringBuilder()
+                for (i in 0..stateBean.linesList.size) {
+                    let line = stateBean.linesList[i]
+                    let t = line.codeLine.trimAscii().replace(" ","")
+
+                    if (t.endsWith("]int{")||t.endsWith("]string{")||t.endsWith("]float64{")||t.contains("]int{//")||t.contains("]string{//")||t.contains("]float64{//")) {
+                        if((t.contains("][") || t.contains("] ["))){
+                            inDoubleArrayBlock = true
+                        }
+                    }
+
+                    if((t == "{" || t.contains("{//") || t.contains("{/*")) && inDoubleArrayBlock){
+                        SubArrayBlock = true
+                    }
+
+                    if((t == "},"|| t.contains("},//") || t.contains("},/*")) && inDoubleArrayBlock){
+                        strBuilder.append(line.codeLine)
+                        line.codeLine = strBuilder.toString()
+                        SubArrayBlock = false
+                        strBuilder = StringBuilder()
+                    }
+
+
+                    if ((t == "}" || t.contains("}//") || t.contains("}/*")) && inDoubleArrayBlock) {
+                        inDoubleArrayBlock = false
+                        strBuilder = StringBuilder()
+                    }
+
+                    if (inDoubleArrayBlock) {
+                        if(SubArrayBlock){
+                            //进来了
+                            line.isDiscarded = true
+                            strBuilder.append(line.codeLine.trimAscii())
+                        }
                     }
                 }
 
@@ -566,6 +612,27 @@ class GoFormat <: GeneralProcessing {
 
 
 
+
+                for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                if (!lineBean.isSingleLine) {
+                    let codeStr = lineBean.codeLine.trimAscii().replace(" ","")
+                    if ( (codeStr == "){" || codeStr == "{")  && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                        //如果当前行是这些字符串就和上一行连在一起
+                        if (i > 0) {
+                            let lastLineBean: LineBean = stateBean.linesList[i - 1]
+                            //如果这样的话，这一行的内容要加到上一行的后面
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lastLineBean.codeLine.trimAscii())
+                            stringbuilder.append(lineBean.codeLine)
+                            lastLineBean.codeLine = stringbuilder.toString()
+                            lineBean.isDiscarded = true
+                        }
+                    }
+                }
+            }
+            //过滤单行废弃
+            removediscard(stateBean)
 
 
 
