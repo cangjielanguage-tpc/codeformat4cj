@@ -354,12 +354,18 @@ class CsharpFormat <: GeneralProcessing {
                     if (nextLineBean.codeLine.trimAscii() == "{") {
                         x++
                     }
+                    if (i + x >= stateBean.linesList.size) {
+                        break
+                    }
                     nextLineBean = stateBean.linesList[i + x]
                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         x++
                         if(!(nextLineBean.codeLine.trimAscii().startsWith("case ") || nextLineBean.codeLine.trimAscii().startsWith("default:"))) {
                             nextLineBean.indentLevel++
+                        }
+                        if (i + x >= stateBean.linesList.size) {
+                            break
                         }
                         nextLineBean = stateBean.linesList[i + x]
                     }

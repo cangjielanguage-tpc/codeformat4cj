@@ -292,6 +292,9 @@ class RustFormat <: GeneralProcessing {
                             lineBean.codeLine = stringbuilder.toString()
                             nextLineBean.isDiscarded = true
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                         if (lineBean.codeLine.trimAscii().replace(" ", "").endsWith("=[")) {
@@ -301,6 +304,9 @@ class RustFormat <: GeneralProcessing {
                                 leftBrace = leftBrace + nextLineBean.codeLine.count("[") - nextLineBean.codeLine.count("]")
                                 nextLineBean.indentLevel = nextLineBean.indentLevel + 1
                                 x++
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 nextLineBean = stateBean.linesList[i + x]
                             }
                         }
@@ -319,18 +325,27 @@ class RustFormat <: GeneralProcessing {
                     var nextLineBean = stateBean.linesList[i + x]
                     while (!(nextLineBean.codeLine.trimAscii() == "{")) {
                         nextLineBean.indentLevel++
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         x++
                         nextLineBean = stateBean.linesList[i + x]
                     }
                     nextLineBean.indentLevel = lineBean.indentLevel
                     var leftBrace = 0
                     x++
+                    if (i + x >= stateBean.linesList.size) {
+                        break
+                    }
                     nextLineBean = stateBean.linesList[i + x]
                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1) && 
                     nextLineBean.codeLine.trimAscii().endsWith("}") &&
                     nextLineBean.codeLine.trimAscii() != "}") {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         nextLineBean.indentLevel++
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         x++
                         nextLineBean = stateBean.linesList[i + x]
                     }
@@ -434,12 +449,18 @@ class RustFormat <: GeneralProcessing {
                             x++
                         }
                         var leftBrace = 0
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         nextLineBean = stateBean.linesList[i + x]
                         while (!(nextLineBean.codeLine.trimAscii().contains("}") &&
                         (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
                         leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                         }
                         if (nextLineBean.codeLine.trimAscii().replace(" ", "").startsWith("}") && nextLineBean.indentLevel == lineBean.indentLevel) {
@@ -503,9 +524,15 @@ class RustFormat <: GeneralProcessing {
                             stateBean.linesList[i + 2].isDiscarded = true
                             var x = 3
                             var leftBrace = 0
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                             while (!((leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1) && nextLineBean.codeLine.trimAscii().endsWith("}"))) {
                                 leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 x++
                                 nextLineBean = stateBean.linesList[i + x]
                             }
@@ -516,8 +543,14 @@ class RustFormat <: GeneralProcessing {
                                 nextLineBean.isDiscarded = true
                             }
                             x++
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             nextLineBean = stateBean.linesList[i + x]
                             if (nextLineBean.codeLine.trimAscii() == "else") {
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 nextLineBean.codeLine = "} else {"
                                 nextLineBean.indentLevel = stateBean.linesList[i + x - 1].indentLevel - 1
                                 x++
@@ -527,6 +560,9 @@ class RustFormat <: GeneralProcessing {
                                     nextLineBean.codeLine = nextLineBean.codeLine.trimAscii()[1..]
                                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                        if (i + x >= stateBean.linesList.size) {
+                                            break
+                                        }
                                         x++
                                         nextLineBean = stateBean.linesList[i + x]
                                     }
@@ -549,10 +585,16 @@ class RustFormat <: GeneralProcessing {
                                 newlineBean.indentLevel = stateBean.linesList[i + x - 1].indentLevel - 1
                                 stateBean.linesList.add(newlineBean, at:i + x + 1)
                                 x++
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 nextLineBean = stateBean.linesList[i + x]
                                 leftBrace = 0
                                 while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                                     leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                    if (i + x >= stateBean.linesList.size) {
+                                        break
+                                    }
                                     x++
                                     nextLineBean = stateBean.linesList[i + x]
                                 }
@@ -584,6 +626,9 @@ class RustFormat <: GeneralProcessing {
                         var nextLineBean: LineBean = stateBean.linesList[i + 1]
                         while (!(nextLineBean.codeLine.trimAscii().endsWith("}") && (leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1))) {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             x++
                             nextLineBean = stateBean.linesList[i + x]
                         }
@@ -598,8 +643,14 @@ class RustFormat <: GeneralProcessing {
                         newlineBean.indentLevel = nextLineBean.indentLevel - 1
                         stateBean.linesList.add(newlineBean, at:i + x + 1)
                         x = x + 2
+                        if (i + x >= stateBean.linesList.size) {
+                            break
+                        }
                         nextLineBean = stateBean.linesList[i + x]
                         if (nextLineBean.codeLine.trimAscii() == "else {") {
+                            if (i + x >= stateBean.linesList.size) {
+                                break
+                            }
                             stateBean.linesList[i + x - 1].isDiscarded = true
                             nextLineBean.codeLine = nextLineBean.codeLine.trimAscii().replace("else {", "} else {")
                             leftBrace = 0
@@ -607,6 +658,9 @@ class RustFormat <: GeneralProcessing {
                             nextLineBean = stateBean.linesList[i + x]
                             while (!(nextLineBean.codeLine.trimAscii().endsWith("}") && (leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1))) {
                                 leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
+                                if (i + x >= stateBean.linesList.size) {
+                                    break
+                                }
                                 x++
                                 nextLineBean = stateBean.linesList[i + x]
                             }
