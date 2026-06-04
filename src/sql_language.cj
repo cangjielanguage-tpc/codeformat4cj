@@ -1,6 +1,17 @@
 package codeformat
 
 class SqlFormat <: BaseLanguage {
+
+    let KeyWorldList:Array<String> = [
+        "SELECT","FROM","WHERE ","AND ","OR "," NOT"," IN","LIKE ","BETWEEN ","IS "," NULL","JOIN ","INNER ","LEFT ","RIGHT ","FULL ","OUTER ","ON ",
+        "GROUP BY","HAVING ","ORDER BY"," ASC"," DESC","LIMIT ","OFFSET","DISTINCT ","AS ","CASE","WHEN","THEN","ELSE","END","UPDATE ","SET ",
+        "DELETE ","INSERT ","INTO ","VALUES","CREATE ","TABLE ","ALTER ","DROP ","INDEX","VIEW","DATABASE","TRUNCATE","UNION ","UNION ALL",
+        "EXISTS","ANY","ALL","COUNT","SUM(","AVG(","MAX(","MIN(","ROUND","FLOOR","CEIL","UPPER","LOWER","LENGTH","TRIM","SUBSTRING","REPLACE",
+        "CONCAT","NOW","CURDATE","CURTIME"," DATE ","YEAR","MONTH"," DAY","IFNULL","COALESCE","PRIMARY KEY","FOREIGN KEY","REFERENCES",
+        "UNIQUE","NOT NULL","DEFAULT","CHECK","AUTO_INCREMENT","IDENTITY","INDEX","CONSTRAINT","WITH","RECURSIVE","OVER","PARTITION BY",
+        "RANGE","ROWS","BETWEEN","UNBOUNDED","PRECEDING","FOLLOWING","CURRENT ROW","CAST","CONVERT","DECLARE","BEGIN","COMMIT","ROLLBACK",
+        "TRANSACTION","FOR","CROSS ","ADD ","COLUMN ","MODIFY "]
+
     public override func dealWithNewLine(stateBean: StateBean): Unit {
  
     }
@@ -223,7 +234,6 @@ class SqlFormat <: BaseLanguage {
         if (currentIndex >= 2) {
             if (notNullChar[currentIndex - 2].toAsciiLowerCase() == r'f' && notNullChar[currentIndex - 1].toAsciiLowerCase() == r'o' &&
                 notNullChar[currentIndex].toAsciiLowerCase() == r'r') {
-                dealWithKeyWorldUpper("for",currentIndex,notNullChar)
                 stateBean.isInFor = true
                 return
             }
@@ -267,14 +277,33 @@ class SqlFormat <: BaseLanguage {
         if (currentIndex >= 5) {
             if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'v' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r'a' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'u' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&notNullChar[currentIndex] == r's') {
-                dealWithKeyWorldUpper("values",currentIndex,notNullChar)
+                notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&notNullChar[currentIndex].toAsciiLowerCase() == r's') {
                 stateBean.isInValues = true
                 dealWithInSqlValues(stateBean)
                 return
             }
         }
     }
+
+
+
+    public func dealWithSqlKeyWord(stateBean:StateBean,keyWord:String):Unit{
+        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
+        let currentIndex: Int64 = stateBean.currentIndex
+        if(currentIndex >= keyWord.size - 1){
+            var matchLetter:Bool = true
+            for(i in 0..keyWord.size){
+                if(!(notNullChar[currentIndex + 1 - keyWord.size + i].toAsciiLowerCase() == keyWord.toRuneArray()[i].toAsciiLowerCase())){
+                    matchLetter = false
+                    break
+                }
+            }
+            if(matchLetter){
+                dealWithKeyWorldUpper(keyWord,currentIndex,notNullChar)
+            }
+        }
+    }
+
 
 
     public func dealWithSqlUnion(stateBean: StateBean): Unit {
@@ -284,7 +313,6 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'u' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' && notNullChar[currentIndex].toAsciiLowerCase() == r' ') {  
-                dealWithKeyWorldUpper("union ",currentIndex,notNullChar)
                 dealWithSqlInUnion(stateBean)
                 return
             }
@@ -301,7 +329,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r' ' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'l' &&
                 notNullChar[currentIndex].toAsciiLowerCase() == r'l') {  
-                dealWithKeyWorldUpper("union all",currentIndex,notNullChar)
                 stateBean.isInUnionAll = true      
                 dealWithSqlInUnionAll(stateBean)
                 return
@@ -316,7 +343,6 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 4].toAsciiLowerCase()== r'j' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'o' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'i' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r'n' && notNullChar[currentIndex] == r' ') {  
-                dealWithKeyWorldUpper("join ",currentIndex,notNullChar)
                 stateBean.isInJoin = true      
                 dealWithInSqlJoin(stateBean)
                 return
@@ -334,7 +360,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'j' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') { 
-                dealWithKeyWorldUpper("cross join ",currentIndex,notNullChar) 
                 stateBean.isInJoin = true    
                 stateBean.isInMultiJoin = true   
                 dealWithInSqlCrossJoin(stateBean)
@@ -353,7 +378,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'j' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {  
-                dealWithKeyWorldUpper("inner join ",currentIndex,notNullChar) 
                 stateBean.isInJoin = true    
                 stateBean.isInMultiJoin = true 
                 dealWithInSqlInnerJoin(stateBean)
@@ -372,7 +396,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'j' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {  
-                dealWithKeyWorldUpper("left join ",currentIndex,notNullChar) 
                 stateBean.isInJoin = true  
                 stateBean.isInMultiJoin = true     
                 dealWithInSqlLeftJoin(stateBean)
@@ -392,7 +415,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'j' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {  
-                dealWithKeyWorldUpper("right join ",currentIndex,notNullChar) 
                 stateBean.isInJoin = true     
                 stateBean.isInMultiJoin = true  
                 dealWithInSqlRightJoin(stateBean)
@@ -415,7 +437,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'j' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'o' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {  
-                dealWithKeyWorldUpper("full outer join ",currentIndex,notNullChar) 
                 stateBean.isInJoin = true    
                 stateBean.isInMultiJoin = true   
                 dealWithInSqlFullOuterJoin(stateBean)
@@ -436,7 +457,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'b' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("create table ",currentIndex,notNullChar) 
                 stateBean.isInCreateTable = true   
                 stateBean.isHasCreateTableLeft = true     
                 stateBean.isHasCreateTableRight = true     
@@ -444,197 +464,6 @@ class SqlFormat <: BaseLanguage {
             }
         }
     }
-
-
-     public func dealWithSqlDesc(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 4) {
-            if (notNullChar[currentIndex - 4].toAsciiLowerCase() == r' ' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'd' &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r'e' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r's' &&
-                notNullChar[currentIndex] == r'c') {
-                dealWithKeyWorldUpper(" desc",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-    public func dealWithSqlAsc(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if (notNullChar[currentIndex - 3].toAsciiLowerCase()== r' ' &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r's' &&
-                notNullChar[currentIndex] == r'c') {
-                dealWithKeyWorldUpper(" asc",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-    public func dealWithSqlAs(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if ((notNullChar[currentIndex - 3].toAsciiLowerCase()== r' ' || notNullChar[currentIndex - 3].toAsciiLowerCase()== r')') &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r's' &&
-                notNullChar[currentIndex] == r' ') {
-                if(notNullChar[currentIndex - 3].toAsciiLowerCase()== r' '){
-                    dealWithKeyWorldUpper(" as ",currentIndex,notNullChar) 
-                }else{
-                    dealWithKeyWorldUpper(")as ",currentIndex,notNullChar) 
-                } 
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlLike(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 4) {
-            if (notNullChar[currentIndex - 4].toAsciiLowerCase()== r'l' && notNullChar[currentIndex - 3].toAsciiLowerCase() == r'i' &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r'k' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&
-                notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("like ",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-    public func dealWithSqlIn(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 2) {
-            if (notNullChar[currentIndex - 2].toAsciiLowerCase() == r' ' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'i' &&
-                notNullChar[currentIndex] == r'n') {
-                dealWithKeyWorldUpper(" in",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-
-    public func dealWithSqlCount(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 5) {
-            if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'c' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r'o' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'u' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'n' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r't' && notNullChar[currentIndex].toAsciiLowerCase()== r'('){
-                dealWithKeyWorldUpper("count(",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-    public func dealWithSqlSum(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r's' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'u' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'm' && notNullChar[currentIndex].toAsciiLowerCase()== r'('){
-                dealWithKeyWorldUpper("sum(",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-     public func dealWithSqlMax(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'a' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'x' && notNullChar[currentIndex].toAsciiLowerCase()== r'('){
-                dealWithKeyWorldUpper("max(",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-     public func dealWithSqlMin(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'i' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'n' && notNullChar[currentIndex].toAsciiLowerCase()== r'('){
-                dealWithKeyWorldUpper("min(",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlAvg(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 3) {
-            if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'v' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'g' && notNullChar[currentIndex].toAsciiLowerCase()== r'('){
-                dealWithKeyWorldUpper("avg(",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlIsNull(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 6) {
-            if (notNullChar[currentIndex - 6].toAsciiLowerCase()== r'i' &&
-                notNullChar[currentIndex - 5].toAsciiLowerCase() == r's' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r' ' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'u' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'l' && notNullChar[currentIndex].toAsciiLowerCase()== r'l'){
-                dealWithKeyWorldUpper("is null",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-
-    public func dealWithSqlIsNull2(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 7) {
-            if (notNullChar[currentIndex - 7].toAsciiLowerCase()== r'i' && notNullChar[currentIndex - 6].toAsciiLowerCase()== r's' &&
-                notNullChar[currentIndex - 5].toAsciiLowerCase() == r' ' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r' ' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'u' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'l' && notNullChar[currentIndex].toAsciiLowerCase()== r'l'){
-                dealWithKeyWorldUpper("is  null",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlIsNotNull(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 10) {
-            if (notNullChar[currentIndex - 10].toAsciiLowerCase()== r'i' &&
-                notNullChar[currentIndex - 9].toAsciiLowerCase() == r's' && notNullChar[currentIndex - 8].toAsciiLowerCase()== r' ' &&
-                notNullChar[currentIndex - 7].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 6].toAsciiLowerCase()== r'o' &&
-                notNullChar[currentIndex - 5].toAsciiLowerCase() == r't' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r' ' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'u' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'l' && notNullChar[currentIndex].toAsciiLowerCase()== r'l'){
-                dealWithKeyWorldUpper("is not null",currentIndex,notNullChar) 
-                return
-            }
-        }
-    }
-
-
-
-
-
-
-
-
 
 
     public func dealWithSqlAlterTable(stateBean: StateBean): Unit {
@@ -648,7 +477,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'a' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'b' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("alter table ",currentIndex,notNullChar) 
                 stateBean.isInAlterTable = true    
                 return
             }
@@ -666,7 +494,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'u' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("add column ",currentIndex,notNullChar) 
                 dealWithInSqlAddColumn(stateBean)
                 return
             }
@@ -685,7 +512,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'u' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') { 
-                dealWithKeyWorldUpper("modify column ",currentIndex,notNullChar) 
                 dealWithInSqlModifyColumn(stateBean)
                 return
             }
@@ -703,7 +529,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'u' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'n' &&
                 notNullChar[currentIndex] == r' ') {   
-                dealWithKeyWorldUpper("drop column ",currentIndex,notNullChar) 
                 dealWithInSqlDropColumn(stateBean)
                 return
             }
@@ -721,10 +546,8 @@ class SqlFormat <: BaseLanguage {
                 (notNullChar[currentIndex].toAsciiLowerCase() == r' ' || notNullChar[currentIndex].toAsciiLowerCase() == r'*')) {
                 stateBean.isInSelect = true
                 if(notNullChar[currentIndex].toAsciiLowerCase() == r' '){
-                    dealWithKeyWorldUpper("select ",currentIndex,notNullChar)
                     dealWithInSqlSelect(stateBean,1)
                 }else{
-                    dealWithKeyWorldUpper("select*",currentIndex,notNullChar)
                     dealWithInSqlSelect(stateBean,2)
                 }    
                 return
@@ -733,51 +556,6 @@ class SqlFormat <: BaseLanguage {
     }
 
 
-    public func dealWithSqlDistinct(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 8) {
-            if (notNullChar[currentIndex - 8].toAsciiLowerCase() == r'd' && notNullChar[currentIndex - 7].toAsciiLowerCase() == r'i' &&
-                notNullChar[currentIndex - 6].toAsciiLowerCase() == r's' && notNullChar[currentIndex - 5].toAsciiLowerCase()== r't' &&
-                notNullChar[currentIndex - 4].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'n' &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r'c' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r't' &&
-                notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("distinct ",currentIndex,notNullChar)
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlUpdate(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 6) {
-            if (notNullChar[currentIndex - 6].toAsciiLowerCase() == r'u' && notNullChar[currentIndex - 5].toAsciiLowerCase() == r'p' &&
-                notNullChar[currentIndex - 4].toAsciiLowerCase() == r'd' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'a' &&
-                notNullChar[currentIndex - 2].toAsciiLowerCase() == r't' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'e' &&
-                notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("update ",currentIndex,notNullChar)
-                return
-            }
-        }
-    }
-
-    public func dealWithSqlInsertInto(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 11) {
-            if (notNullChar[currentIndex - 11].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 10].toAsciiLowerCase() == r'n' &&
-                notNullChar[currentIndex - 9].toAsciiLowerCase() == r's' && notNullChar[currentIndex - 8].toAsciiLowerCase() == r'e' &&
-                notNullChar[currentIndex - 7].toAsciiLowerCase() == r'r' && notNullChar[currentIndex - 6].toAsciiLowerCase() == r't' &&
-                notNullChar[currentIndex - 5].toAsciiLowerCase() == r' ' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r'i' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r't' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r'o' && notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("insert into ",currentIndex,notNullChar)
-                return
-            }
-        }
-    }
 
     public func dealWithSqlSubSelect(stateBean: StateBean): Unit {
         let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
@@ -788,7 +566,7 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'e' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'c' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r't' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("(select ",currentIndex,notNullChar) 
+                //dealWithKeyWorldUpper("(select ",currentIndex,notNullChar) 
                 //左括号计数
                 if(!stateBean.isInSubSelect){
                     stateBean.isInSubSelectCount++
@@ -810,7 +588,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r' ' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'f' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'r' && notNullChar[currentIndex - 1].toAsciiLowerCase() == r'o' && 
                 notNullChar[currentIndex].toAsciiLowerCase()== r'm') {
-                dealWithKeyWorldUpper("delete from",currentIndex,notNullChar) 
                 stateBean.isInDeleteFrom = true
                 return
             }
@@ -824,12 +601,10 @@ class SqlFormat <: BaseLanguage {
         if (currentIndex >= 3) {
             if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r'f' && notNullChar[currentIndex - 2].toAsciiLowerCase() == r'r' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r'o' && notNullChar[currentIndex].toAsciiLowerCase()== r'm') {
-                dealWithKeyWorldUpper("from",currentIndex,notNullChar) 
                 stateBean.isInSelect = false
                 stateBean.isInFrom = true
                 stateBean.isHasFrom = true
                 //这里一般还没where 出了子select
-                //stateBean.isHasWhere = false
                 dealWithInSqlFrom(stateBean)
                 return
             }
@@ -844,7 +619,6 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r's' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'e' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r't' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("set ",currentIndex,notNullChar) 
                 stateBean.isInSet = true    
                 dealWithInSqlSet(stateBean)
                 return
@@ -859,24 +633,9 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'w' && notNullChar[currentIndex - 4].toAsciiLowerCase() == r'h' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'e' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'r' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r'e'&& notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("where ",currentIndex,notNullChar) 
                 stateBean.isHasWhere = true    
                 stateBean.isInWhere = true    
                 dealWithInSqlWhere(stateBean)
-                return
-            }
-        }
-    }
-
-
-    public func dealWithSqlExists(stateBean: StateBean): Unit {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (currentIndex >= 5) {
-            if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'e' && notNullChar[currentIndex - 4].toAsciiLowerCase() == r'x' &&
-                notNullChar[currentIndex - 3].toAsciiLowerCase() == r'i' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r's' &&
-                notNullChar[currentIndex - 1].toAsciiLowerCase() == r't' && notNullChar[currentIndex].toAsciiLowerCase()== r's') {
-                dealWithKeyWorldUpper("exists",currentIndex,notNullChar) 
                 return
             }
         }
@@ -890,7 +649,6 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 3].toAsciiLowerCase() == r'a' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'd' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("and ",currentIndex,notNullChar) 
                 if(stateBean.isInBetween){
                     stateBean.isInBetween = false     
                 }else{
@@ -912,7 +670,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r'r' &&
                 notNullChar[currentIndex] == r' ') {
                 //其实就是判断经过了and 或者 or
-                dealWithKeyWorldUpper("or ",currentIndex,notNullChar) 
                 stateBean.subSelectHasInAndOr = true
                 dealWithInOr(stateBean)    
                 return
@@ -929,7 +686,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'p' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r' ' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'b' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'y' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("group by ",currentIndex,notNullChar) 
                 stateBean.isInGroupBy = true    
                 dealWithInGroupBy(stateBean)
                 return
@@ -946,7 +702,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'v' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r'i' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'n' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'g' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("having ",currentIndex,notNullChar) 
                 if(stateBean.isInGroupBy){
                     stateBean.isInGroupBy = false
                 }    
@@ -966,7 +721,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 4].toAsciiLowerCase() == r'r' && notNullChar[currentIndex - 3].toAsciiLowerCase()== r' ' &&
                 notNullChar[currentIndex - 2].toAsciiLowerCase() == r'b' && notNullChar[currentIndex - 1].toAsciiLowerCase()== r'y' &&
                 notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("order by ",currentIndex,notNullChar) 
                 if(stateBean.isInGroupBy){
                     stateBean.isInGroupBy = false
                 }   
@@ -984,7 +738,6 @@ class SqlFormat <: BaseLanguage {
             if (notNullChar[currentIndex - 5].toAsciiLowerCase() == r'l' && notNullChar[currentIndex - 4].toAsciiLowerCase() == r'i' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'm' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'i' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r't'&& notNullChar[currentIndex] == r' ') { 
-                dealWithKeyWorldUpper("limit ",currentIndex,notNullChar)    
                 if(stateBean.isInGroupBy){
                     stateBean.isInGroupBy = false
                 }  
@@ -1048,7 +801,6 @@ class SqlFormat <: BaseLanguage {
                 notNullChar[currentIndex - 5].toAsciiLowerCase() == r't' && notNullChar[currentIndex - 4].toAsciiLowerCase()== r'w' &&
                 notNullChar[currentIndex - 3].toAsciiLowerCase() == r'e' && notNullChar[currentIndex - 2].toAsciiLowerCase()== r'e' &&
                 notNullChar[currentIndex - 1].toAsciiLowerCase() == r'n'&& notNullChar[currentIndex] == r' ') {
-                dealWithKeyWorldUpper("between ",currentIndex,notNullChar)    
                 stateBean.isInBetween = true
                 return
             }
@@ -1956,8 +1708,9 @@ class SqlFormat <: BaseLanguage {
 
     // 核心格式化函数（整合缩进+换行规则）
     func formatCode(rawCode: String, cfg: FormatConfig): String {
+        let runCode = rawCode.replace("\r\n","\n")
         //每一次的状态变量
-        var realRawCode = rawCode.trimAscii()
+        var realRawCode = runCode.trimAscii()
         if(!realRawCode.endsWith(";")){
             realRawCode = realRawCode+";"
         }
@@ -1998,6 +1751,13 @@ class SqlFormat <: BaseLanguage {
                     continue
                 }
                 dealWithString(stateBean)
+
+                if (!stateBean.isInString) {
+                    for(i in 0..KeyWorldList.size){
+                        dealWithSqlKeyWord(stateBean,KeyWorldList[i])
+                    }
+                 }
+
                 if (!stateBean.isInString) {
                     dealWithFor(stateBean)
                 }
@@ -2007,58 +1767,6 @@ class SqlFormat <: BaseLanguage {
                     dealWithSqlCreateTable(stateBean)
                 }
 
-                if (!stateBean.isInString) {
-                    dealWithSqlDesc(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlAsc(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlAs(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlLike(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlIn(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlCount(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlSum(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlMax(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlMin(stateBean)
-                }
-
-
-                if (!stateBean.isInString) {
-                    dealWithSqlAvg(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlIsNull(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlIsNull2(stateBean)
-                }
-
-                  if (!stateBean.isInString) {
-                    dealWithSqlIsNotNull(stateBean)
-                }
 
                 if (!stateBean.isInString) {
                     dealWithSqlAlterTable(stateBean)
@@ -2086,18 +1794,6 @@ class SqlFormat <: BaseLanguage {
                     }
                 }
 
-                if (!stateBean.isInString) {
-                    dealWithSqlDistinct(stateBean)
-                }
-
-
-                if (!stateBean.isInString) {
-                    dealWithSqlUpdate(stateBean)
-                }
-
-                if (!stateBean.isInString) {
-                    dealWithSqlInsertInto(stateBean)
-                }
 
                 if (!stateBean.isInString) {
                     dealWithSqlDeleteFrom(stateBean)
@@ -2123,9 +1819,6 @@ class SqlFormat <: BaseLanguage {
                     dealWithSqlWhere(stateBean)
                 }
 
-                if (!stateBean.isInString) {
-                    dealWithSqlExists(stateBean)
-                }
               
                 if (!stateBean.isInString) {
                     dealWithSqlAnd(stateBean)
@@ -2310,7 +2003,6 @@ class SqlFormat <: BaseLanguage {
 
             //如果只有一个换行就过滤
             removeOnlyChangeLine(stateBean)
-
 
             
             for (i in 0..stateBean.linesList.size) {
