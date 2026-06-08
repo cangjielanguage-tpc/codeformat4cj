@@ -1,3 +1,6 @@
+## 1.1.0
+- 适配6.1.1.280版本
+
 ## 1.0.3
 - 增加了对Html,Go,kotlin,swift,Rust,C#,Dart,PHP,Cangjie,SQL,Scala,Bash代码的格式化功能
 
