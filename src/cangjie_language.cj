@@ -2,121 +2,51 @@ package codeformat
 
 class CangjieFormat <: GeneralProcessing {
 
-    // 处理访问修饰符 public
+    func makeAccessLine(stateBean: StateBean, kw: String, kwLen: Int64): Unit {
+        stateBean.isInAccessFlag = true
+        let lb = LineBean()
+        lb.codeLine = kw
+        lb.indentLevel = stateBean.indentLevel
+        setCommonFields(lb, stateBean)
+        lb.isInFor = stateBean.isInFor
+        stateBean.linesList.add(lb)
+        stateBean.perLineOutput = StringBuilder()
+        stateBean.isLineStart = true
+        stateBean.perLineStartIndex = stateBean.currentIndex + kwLen
+        stateBean.isInAccessFlag = false
+        stateBean.lastChar = r'\n'
+        stateBean.currentIndex += kwLen + 1
+    }
+
     public override func dealWithAccessPublic(stateBean: StateBean): Bool {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (notNullChar.size > currentIndex + 6) {
-            if (notNullChar[currentIndex] == r'p' && notNullChar[currentIndex + 1] == r'u' &&
-                notNullChar[currentIndex + 2] == r'b' && notNullChar[currentIndex + 3] == r'l' &&
-                notNullChar[currentIndex + 4] == r'i' && notNullChar[currentIndex + 5] == r'c') {
-                // Cangjie 语言的访问修饰符后面没有冒号
-                stateBean.isInAccessFlag = true
-                let lineBean: LineBean = LineBean()
-                let lineCode: String = "public"
-                lineBean.codeLine = lineCode
-                lineBean.indentLevel = stateBean.indentLevel
-                lineBean.smallBracketDouble = stateBean.smallBracketDouble
-                lineBean.middleBracketDouble = stateBean.middleBracketDouble
-                lineBean.sharpBracketDouble = stateBean.sharpBracketDouble
-                lineBean.isInString = stateBean.isInString
-                lineBean.isInMacro = stateBean.isInMacro
-                lineBean.isInFor = stateBean.isInFor
-                stateBean.linesList.add(lineBean)
-                stateBean.perLineOutput = StringBuilder()
-                stateBean.isLineStart = true
-                stateBean.perLineStartIndex = stateBean.currentIndex + 6 + 1
-                stateBean.isInAccessFlag = false
-                stateBean.lastChar = r'\n'
-                stateBean.currentIndex += 7
-                return true
-            } else {
-                return false
-            }
+        if (matchKw(stateBean, "public", 6)) {
+            makeAccessLine(stateBean, "public", 6)
+            return true
         }
         return false
     }
 
-    // 处理访问修饰符 private
     public override func dealWithAccessPrivate(stateBean: StateBean): Bool {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (notNullChar.size > currentIndex + 7) {
-            if (notNullChar[currentIndex] == r'p' && notNullChar[currentIndex + 1] == r'r' &&
-                notNullChar[currentIndex + 2] == r'i' && notNullChar[currentIndex + 3] == r'v' &&
-                notNullChar[currentIndex + 4] == r'a' && notNullChar[currentIndex + 5] == r't' &&
-                notNullChar[currentIndex + 6] == r'e') {
-                // Cangjie 语言的访问修饰符后面没有冒号
-                stateBean.isInAccessFlag = true
-                let lineBean: LineBean = LineBean()
-                let lineCode: String = "private"
-                lineBean.codeLine = lineCode
-                lineBean.indentLevel = stateBean.indentLevel
-                lineBean.smallBracketDouble = stateBean.smallBracketDouble
-                lineBean.middleBracketDouble = stateBean.middleBracketDouble
-                lineBean.sharpBracketDouble = stateBean.sharpBracketDouble
-                lineBean.isInString = stateBean.isInString
-                lineBean.isInMacro = stateBean.isInMacro
-                lineBean.isInFor = stateBean.isInFor
-                stateBean.linesList.add(lineBean)
-                stateBean.perLineOutput = StringBuilder()
-                stateBean.isLineStart = true
-                stateBean.perLineStartIndex = stateBean.currentIndex + 7 + 1
-                stateBean.isInAccessFlag = false
-                stateBean.lastChar = r'\n'
-                stateBean.currentIndex += 8
-                return true
-            } else {
-                return false
-            }
+        if (matchKw(stateBean, "private", 7)) {
+            makeAccessLine(stateBean, "private", 7)
+            return true
         }
         return false
     }
 
-    // 处理访问修饰符 protected
     public override func dealWithAccessProtected(stateBean: StateBean): Bool {
-        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
-        let currentIndex: Int64 = stateBean.currentIndex
-        if (notNullChar.size > currentIndex + 9) {
-            if (notNullChar[currentIndex] == r'p' && notNullChar[currentIndex + 1] == r'r' &&
-                notNullChar[currentIndex + 2] == r'o' && notNullChar[currentIndex + 3] == r't' &&
-                notNullChar[currentIndex + 4] == r'e' && notNullChar[currentIndex + 5] == r'c' &&
-                notNullChar[currentIndex + 6] == r't' && notNullChar[currentIndex + 7] == r'e' &&
-                notNullChar[currentIndex + 8] == r'd') {
-                // Cangjie 语言的访问修饰符后面没有冒号
-                stateBean.isInAccessFlag = true
-                let lineBean: LineBean = LineBean()
-                let lineCode: String = "protected"
-                lineBean.codeLine = lineCode
-                lineBean.indentLevel = stateBean.indentLevel
-                lineBean.smallBracketDouble = stateBean.smallBracketDouble
-                lineBean.middleBracketDouble = stateBean.middleBracketDouble
-                lineBean.sharpBracketDouble = stateBean.sharpBracketDouble
-                lineBean.isInString = stateBean.isInString
-                lineBean.isInMacro = stateBean.isInMacro
-                lineBean.isInFor = stateBean.isInFor
-                stateBean.linesList.add(lineBean)
-                stateBean.perLineOutput = StringBuilder()
-                stateBean.isLineStart = true
-                stateBean.perLineStartIndex = stateBean.currentIndex + 9 + 1
-                stateBean.isInAccessFlag = false
-                stateBean.lastChar = r'\n'
-                stateBean.currentIndex += 10
-                return true
-            } else {
-                return false
-            }
+        if (matchKw(stateBean, "protected", 9)) {
+            makeAccessLine(stateBean, "protected", 9)
+            return true
         }
         return false
     }
 
-    // 核心格式化函数（整合缩进+换行规则）
     func formatCode(rawCode: String, cfg: FormatConfig): String {
-        // 每一次的状态变量
+        let runCode = rawCode.replace("\r\n","\n")
         let stateBean: StateBean = StateBean()
-        // 先把代码分割成诺干行
         stateBean.linesList = ArrayList<LineBean>()
-        stateBean.codeChars = rawCode.toRuneArray()
+        stateBean.codeChars = runCode.toRuneArray()
         if (let Some(i) <- stateBean.codeChars) {
             let len = i.size
             if (len == 0) {
@@ -124,9 +54,7 @@ class CangjieFormat <: GeneralProcessing {
             }
             while (stateBean.currentIndex < len) {
                 let currChar = i[stateBean.currentIndex]
-                // 没解析完成的话保留在perLineOutput里
                 stateBean.perLineOutput.append(currChar)
-                // 处理访问修饰符
                 if (stateBean.isLineStart) {
                     if (dealWithAccessPublic(stateBean)) {
                         continue
@@ -138,7 +66,6 @@ class CangjieFormat <: GeneralProcessing {
                         continue
                     }
                 }
-                // 处理单行注释
                 if (currChar == r'/' && stateBean.lastChar == r'/' && !stateBean.isInString) {
                     var str = stateBean.perLineOutput.toString().removeSuffix("//")
                     if (str.trimAscii().size > 0) {
@@ -148,7 +75,6 @@ class CangjieFormat <: GeneralProcessing {
                     }
                     continue
                 }
-                // 处理多行注释
                 if (currChar == r'*' && stateBean.lastChar == r'/' && !stateBean.isInString) {
                     var str = stateBean.perLineOutput.toString().removeSuffix("/*")
                     if (str.trimAscii().size > 0) {
@@ -163,7 +89,6 @@ class CangjieFormat <: GeneralProcessing {
                     dealWithFor(stateBean)
                 }
 
-                // 处理反引号
                 if (currChar == r'`' && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor) {
                     if (!stateBean.isInBackQuote) {
                         stateBean.isInBackQuote = true
@@ -174,27 +99,22 @@ class CangjieFormat <: GeneralProcessing {
 
                 if (currChar == r'{' && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor &&
                     !stateBean.isInBackQuote) {
-                    // 处理左大括号逻辑
                     dealWithLeftBigBracket(stateBean)
                     continue
                 }
                 if (currChar == r'}' && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor &&
                     !stateBean.isInBackQuote) {
-                    // 处理右大括号逻辑
                     dealWithRightBigBracket(stateBean)
                     continue
                 }
                 if (currChar == r';' && !stateBean.isInMacro && !stateBean.isInString && !stateBean.isInFor) {
-                    // 处理分号逻辑
                     dealWithSemicolon(stateBean)
                     continue
                 }
                 if (currChar == r'\n' && !stateBean.isInString) {
-                    // 进入这里没有进入上面也要加到一行，不然会失去数据
                     dealWithNewLine(stateBean)
                     stateBean.isLineStart = true
                 } else {
-                    // 如果LineStart为true,但是接下来是一些空格开头，那么不应该更改状态
                     if (stateBean.isLineStart && (currChar == r' ' || currChar == r'\t')) {
                         stateBean.isLineStart = true
                     } else {
@@ -204,10 +124,8 @@ class CangjieFormat <: GeneralProcessing {
                 stateBean.lastChar = currChar
                 stateBean.currentIndex++
             }
-            // 在这里处理stateBean.perLineOutput还有剩余数据的问题
             dealWithNewLine(stateBean)
 
-            // 处理单行注释合并问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.isInSinglelineComment) {
@@ -226,7 +144,6 @@ class CangjieFormat <: GeneralProcessing {
                     }
                 }
             }
-            // 处理多行注释合并问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.isInMultilineComment && lineBean.isFirstMultiCommentLine) {
@@ -244,9 +161,7 @@ class CangjieFormat <: GeneralProcessing {
                 }
             }
 
-            // 如果只有一个换行就过滤
             removeOnlyChangeLine(stateBean)
-            // 这里处理如果}前面还有内容就和上一行连在一起解决数组中的{}问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.codeLine.trimAscii().endsWith("}") && lineBean.codeLine.trimAscii().size > 1 &&
@@ -265,9 +180,7 @@ class CangjieFormat <: GeneralProcessing {
                     }
                 }
             }
-            // 去除一次废弃内容
             removediscard(stateBean)
-            // 这里修改}后面如果是；就连在一起
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.codeLine.trimAscii() == ";" && !lineBean.isInMultilineComment &&
@@ -282,7 +195,6 @@ class CangjieFormat <: GeneralProcessing {
                     }
                 }
             }
-            // 过滤单行废弃
             removediscard(stateBean)
 
             for (i in 0..stateBean.linesList.size) {
@@ -305,7 +217,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理上一行,结尾 下一行是];结尾的情况
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
@@ -325,7 +236,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理单行只有);但是上一行是}结尾的情况
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
@@ -344,7 +254,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理if()后面没有{，下一行有，就下一行就和他一起
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
@@ -362,7 +271,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理if(...\n...){场景(当if中的判断条件换行时，换行之后的条件代码需要缩进加一)
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
@@ -380,7 +288,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理数组场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -407,7 +314,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理修饰符场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -425,7 +331,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理return场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -452,7 +357,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
             
-            // 处理多余换行的场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -470,7 +374,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 2.7 处理数组场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -491,7 +394,6 @@ class CangjieFormat <: GeneralProcessing {
                             }
                             nextLineBean = stateBean.linesList[i + x]
                         }
-                        // 只有一行，加到上一行末尾
                         if (x == 1) {
                             lineBean.codeLine = lineBean.codeLine.trimAscii().replace("\n", "") + nextLineBean.codeLine.trimAscii()
                         }
@@ -500,7 +402,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 处理单行有未闭合的]、)、}这类符号，上一行有未闭合的[、(、{，则将该行添加到上一行
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -550,7 +451,6 @@ class CangjieFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // 去除了对macro宏的逻辑，如果是#开头的宏代码 lineBean的indentLevel还是要设置一下，不然会有问题
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
@@ -559,15 +459,12 @@ class CangjieFormat <: GeneralProcessing {
                 }
             }
 
-            // 获得最终的list
             let usefulList: ArrayList<LineBean> = stateBean.linesList
             for (item in usefulList) {
                 item.codeLine = item.codeLine.trimAscii()
             }
-            // 修改#开始的宏和后面空格不一致问题
             modifyMacroAndSpace(stateBean)
 
-            // 最后根据缩进拼接
             for (index in 0..usefulList.size) {
                 let item: LineBean = usefulList[index]
                 addIndent(stateBean.output, item.indentLevel, cfg)
