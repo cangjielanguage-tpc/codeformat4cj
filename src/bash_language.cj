@@ -1170,6 +1170,15 @@ class BashFormat <: BaseLanguage {
 
         while (stateBean.currentIndex < len) {
             let currChar = chars[stateBean.currentIndex]
+
+            // 统一处理CRLF：先append \r，跳过 \n，让perLineOutput包含完整换行符
+            if (currChar == r'\r' && stateBean.currentIndex + 1 < len && chars[stateBean.currentIndex + 1] == r'\n') {
+                stateBean.perLineOutput.append(currChar)
+                stateBean.currentIndex++
+                stateBean.lastChar = currChar
+                continue
+            }
+
             stateBean.perLineOutput.append(currChar)
 
             // 处理行内注释

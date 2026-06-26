@@ -1,8 +1,6 @@
 package codeformat
 
-// 用于格式化 HTML 代码，保持代码内容不变，仅调整缩进和换行
 class HtmlFormat <: GeneralProcessing {
-    // 处理多行注释
     public override func dealWithMultiLineComment(stateBean: StateBean, perStr: String): Unit {
         let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
         stateBean.isInMultilineComment = true
@@ -11,7 +9,6 @@ class HtmlFormat <: GeneralProcessing {
         var lastChar: Rune = r'<'
         var lastLastChar: Rune = r'!'
 
-        // 处理多行注释内容
         if (notNullChar.size > stateBean.currentIndex + 2) {
             stateBean.currentIndex += 2
             let newcurrentIndex = stateBean.currentIndex
@@ -49,7 +46,6 @@ class HtmlFormat <: GeneralProcessing {
         stateBean.isInMultilineComment = false
     }
 
-    // 处理字符串
     public override func dealWithString(stateBean: StateBean): Unit {
         let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
         let currentIndex: Int64 = stateBean.currentIndex
@@ -75,27 +71,22 @@ class HtmlFormat <: GeneralProcessing {
         }
     }
 
-    // 判断是否为DOCTYPE标签
     func isDoctypeTag(tagContent: String): Bool {
         return tagContent.toAsciiLower().startsWith("<!doctype")
     }
 
-    // 判断是否为注释标签
     func isCommentTag(tagContent: String): Bool {
         return tagContent.startsWith("<!--")
     }
 
-    // 判断是否为开始标签
     func isStartTag(tagContent: String): Bool {
         return tagContent.contains("<") && !tagContent.contains("</") && !tagContent.contains("<!") && !tagContent.contains("< ")
     }
 
-    // 判断是否为结束标签
     func isEndTag(tagContent: String): Bool {
         return tagContent.contains("</")
     }
 
-    // 判断是否为自闭合标签
     func isSelfClosingTag(tagContent: String): Bool {
         let lower = tagContent.toAsciiLower()
         return lower.contains("/>") || 
@@ -109,11 +100,11 @@ class HtmlFormat <: GeneralProcessing {
                lower.startsWith("<wbr")
     }
 
-    // 核心格式化函数（整合缩进+换行规则）
     func formatCode(rawCode: String, cfg: FormatConfig): String {
+        let runCode = rawCode.replace("\r\n","\n")
         let stateBean: StateBean = StateBean()
         stateBean.linesList = ArrayList<LineBean>()
-        stateBean.codeChars = rawCode.toRuneArray()
+        stateBean.codeChars = runCode.toRuneArray()
         
         if (let Some(i) <- stateBean.codeChars) {
             let len = i.size
@@ -125,7 +116,6 @@ class HtmlFormat <: GeneralProcessing {
                 let currChar = i[stateBean.currentIndex]
                 stateBean.perLineOutput.append(currChar)
 
-                // 处理HTML注释
                 if (currChar == r'-' && stateBean.lastChar == r'-' && !stateBean.isInString) {
                     if (stateBean.currentIndex >= 2 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
                         var str = stateBean.perLineOutput.toString().removeSuffix("<!--")
@@ -138,7 +128,6 @@ class HtmlFormat <: GeneralProcessing {
                     }
                 }
 
-                // 处理大括号（用于script/style标签内）
                 if (currChar == r'{' && !stateBean.isInString && !stateBean.isInMacro) {
                     dealWithLeftBigBracket(stateBean)
                     continue
@@ -148,7 +137,6 @@ class HtmlFormat <: GeneralProcessing {
                     continue
                 }
 
-                // 处理标签结束符
                 if (currChar == r'>' && !stateBean.isInString) {
                     let currentOutput = stateBean.perLineOutput.toString()
                     let lineBean = LineBean()
@@ -204,7 +192,6 @@ class HtmlFormat <: GeneralProcessing {
 
             removeOnlyChangeLine(stateBean)
 
-            //去除{换行，下一行结尾是}的场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
@@ -212,8 +199,6 @@ class HtmlFormat <: GeneralProcessing {
                     if (i > 0) {
                         let lastLineBean: LineBean = stateBean.linesList[i - 1]
                         if (lastLineBean.codeLine.trimAscii().endsWith("{")) {
-                            //上一行以{结尾那么合并这两行
-                            //如果这样的话，这一行的内容要加到上一行的后面
                             let stringbuilder: StringBuilder = StringBuilder()
                             stringbuilder.append(lastLineBean.codeLine)
                             stringbuilder.append(lineBean.codeLine)
@@ -225,7 +210,6 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // >符号结尾加换行时的场景
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
@@ -266,7 +250,6 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            // <p>场景修改
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine
@@ -299,7 +282,6 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            //单行无<、>符号且上一行为<li>或<input>则合并到上一行
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
@@ -318,7 +300,6 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            //html标签内内容需要缩进
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
@@ -338,7 +319,6 @@ class HtmlFormat <: GeneralProcessing {
                 }
             }
             removediscard(stateBean)
-            //<div>标签内内容修改
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (!lineBean.codeLine.trimAscii().endsWith("<div>") || lineBean.isDiscarded == true) {
@@ -363,7 +343,6 @@ class HtmlFormat <: GeneralProcessing {
             }
             removediscard(stateBean)
 
-            //注释为0内内容需要缩进
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.codeLine.trimAscii() == "<!--" && lineBean.isInMultilineComment) {
