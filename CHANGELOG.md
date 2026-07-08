@@ -1,3 +1,9 @@
+## 1.0.5
+- 对SQL进行了关键字扩展
+
+## 1.0.4
+- 支持Html,Go,kotlin,swift,Rust,C#,Dart,PHP,Cangjie,SQL,Scala,Bash代码的格式化
+
 ## 1.0.3
 - 升级到仓颉 1.1.3 版本
 
