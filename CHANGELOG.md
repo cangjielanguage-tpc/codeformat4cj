@@ -1,3 +1,9 @@
+## 1.0.5
+- 扩展了sql的关键字
+
+## 1.0.4
+- 修复了一些bug
+
 ## 1.0.3
 - 增加了对Html,Go,kotlin,swift,Rust,C#,Dart,PHP,Cangjie,SQL,Scala,Bash代码的格式化功能
 

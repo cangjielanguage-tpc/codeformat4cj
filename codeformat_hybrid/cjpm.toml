@@ -13,7 +13,7 @@
 
 [dependencies]
   [dependencies.codeformat]
-    tag = "v1.0.3"
+    tag = "v1.0.5"
     git = "https://gitcode.com/Cangjie-TPC/codeformat4cj.git"
 
 [profile]
