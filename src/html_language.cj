@@ -101,10 +101,9 @@ class HtmlFormat <: GeneralProcessing {
     }
 
     func formatCode(rawCode: String, cfg: FormatConfig): String {
-        let runCode = rawCode.replace("\r\n","\n")
         let stateBean: StateBean = StateBean()
         stateBean.linesList = ArrayList<LineBean>()
-        stateBean.codeChars = runCode.toRuneArray()
+        stateBean.codeChars = rawCode.toRuneArray()
         
         if (let Some(i) <- stateBean.codeChars) {
             let len = i.size
@@ -192,6 +191,39 @@ class HtmlFormat <: GeneralProcessing {
 
             removeOnlyChangeLine(stateBean)
 
+            let splitList: ArrayList<LineBean> = ArrayList<LineBean>()
+            for (i in 0..stateBean.linesList.size) {
+                let lineBean: LineBean = stateBean.linesList[i]
+                let codeStr = lineBean.codeLine.trimAscii()
+                if (!codeStr.startsWith("<") && codeStr.contains("<")) {
+                    let parts = codeStr.split("<")
+                    if (parts.size >= 2 && parts[0].size > 0 && parts[1].size > 0) {
+                        let firstChar = parts[1].toRuneArray()[0]
+                        if ((firstChar >= r'a' && firstChar <= r'z') || (firstChar >= r'A' && firstChar <= r'Z')) {
+                            let textBean: LineBean = LineBean()
+                            textBean.codeLine = parts[0]
+                            textBean.indentLevel = lineBean.indentLevel
+                            splitList.add(textBean)
+                            var tagStr = "<" + parts[1]
+                            for (j in 2..parts.size) {
+                                tagStr = tagStr + "<" + parts[j]
+                            }
+                            let tagBean: LineBean = LineBean()
+                            tagBean.codeLine = tagStr
+                            tagBean.indentLevel = lineBean.indentLevel
+                            splitList.add(tagBean)
+                        } else {
+                            splitList.add(lineBean)
+                        }
+                    } else {
+                        splitList.add(lineBean)
+                    }
+                } else {
+                    splitList.add(lineBean)
+                }
+            }
+            stateBean.linesList = splitList
+
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii()
@@ -212,6 +244,9 @@ class HtmlFormat <: GeneralProcessing {
 
             for (i in 0..stateBean.linesList.size) {
                 let lineBean: LineBean = stateBean.linesList[i]
+                if (lineBean.isDiscarded) {
+                    continue
+                }
                 let codeStr = lineBean.codeLine.trimAscii()
                 if (codeStr.endsWith(">") && codeStr.startsWith("<") && !lineBean.isInMultilineComment) {
                     var tagHeader = ""
@@ -233,10 +268,7 @@ class HtmlFormat <: GeneralProcessing {
                             }
                         } else if (nextLineBean.codeLine.contains("<") && nextLineBean.codeLine.trimAscii().endsWith(">")) {
                             var x = 1
-                            while (!stateBean.linesList[i + x].codeLine.trimAscii().startsWith("<")) {
-                                if (i + x >= stateBean.linesList.size) {
-                                    break
-                                }
+                            while (i + x < stateBean.linesList.size && !stateBean.linesList[i + x].codeLine.trimAscii().startsWith("<")) {
                                 let stringbuilder: StringBuilder = StringBuilder()
                                 stringbuilder.append(lineBean.codeLine)
                                 stringbuilder.append(stateBean.linesList[i + x].codeLine)
@@ -264,8 +296,11 @@ class HtmlFormat <: GeneralProcessing {
                         let stringbuilder: StringBuilder = StringBuilder()
                         stringbuilder.append(codeStr)
                         var x = 1
+                        if (i + x >= stateBean.linesList.size) {
+                            continue
+                        }
                         var nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
-                        while (!nextLineBeanStr.endsWith("</p>")) {
+                        while (i + x < stateBean.linesList.size && !nextLineBeanStr.endsWith("</p>")) {
                             stringbuilder.append(stateBean.linesList[i + x].codeLine)
                             stateBean.linesList[i + x].isDiscarded = true
                             x++
@@ -274,9 +309,11 @@ class HtmlFormat <: GeneralProcessing {
                             }
                             nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
                         }
-                        stringbuilder.append(stateBean.linesList[i + x].codeLine)
+                        if (i + x < stateBean.linesList.size) {
+                            stringbuilder.append(stateBean.linesList[i + x].codeLine)
+                            stateBean.linesList[i + x].isDiscarded = true
+                        }
                         lineBean.codeLine = stringbuilder.toString()
-                        stateBean.linesList[i + x].isDiscarded = true
                     }
                 }
             }
@@ -306,8 +343,11 @@ class HtmlFormat <: GeneralProcessing {
                 if (codeStr.startsWith("<html") && !lineBean.isInMultilineComment) {
                     if (i > 0) {
                         var x = 1
+                        if (i + x >= stateBean.linesList.size) {
+                            continue
+                        }
                         var nextLineBean: LineBean = stateBean.linesList[i + x]
-                        while (!nextLineBean.codeLine.trimAscii().startsWith("</html")) {
+                        while (i + x < stateBean.linesList.size && !nextLineBean.codeLine.trimAscii().startsWith("</html")) {
                             nextLineBean.indentLevel--
                             x++
                             if (i+x >= stateBean.linesList.size) {
@@ -325,7 +365,7 @@ class HtmlFormat <: GeneralProcessing {
                     continue
                 }
                 var x = 1
-                while (lineBean.codeLine.trimAscii().endsWith("<div>") && !lineBean.isInMultilineComment) {
+                while (i + x < stateBean.linesList.size && lineBean.codeLine.trimAscii().endsWith("<div>") && !lineBean.isInMultilineComment) {
                     if (i < stateBean.linesList.size - 1) {
                         if (i + x >= stateBean.linesList.size) {
                             break
@@ -336,6 +376,7 @@ class HtmlFormat <: GeneralProcessing {
                             nextLineBean.isDiscarded = true
                             x++
                         } else {
+                            x++
                             break
                         }
                     }
@@ -347,14 +388,16 @@ class HtmlFormat <: GeneralProcessing {
                 let lineBean: LineBean = stateBean.linesList[i]
                 if (lineBean.codeLine.trimAscii() == "<!--" && lineBean.isInMultilineComment) {
                     var x = 1
-                    while (!(i < stateBean.linesList.size - x && stateBean.linesList[i + x].codeLine.trimAscii().endsWith("-->"))) {
+                    while (i + x < stateBean.linesList.size && !stateBean.linesList[i + x].codeLine.trimAscii().endsWith("-->")) {
                         if (i + x >= stateBean.linesList.size) {
                             break
                         }
                         stateBean.linesList[i + x].indentLevel = 0
                         x++
                     }
-                    stateBean.linesList[i + x].indentLevel = 0
+                    if (i + x < stateBean.linesList.size) {
+                        stateBean.linesList[i + x].indentLevel = 0
+                    }
                 }
             }
             removediscard(stateBean)
