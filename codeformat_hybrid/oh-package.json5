@@ -1,11 +1,11 @@
 {
   "name": "@cangjie-tpc/codeformat_hybrid",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "codeformat_hybrid是一个用仓颉语言编写的适用于鸿蒙系统的代码格式化库。",
   "main": "Index.ets",
   "author": "cangjie-tpc",
   "license": "Apache-2.0",
-  "repository": "https://gitcode.com/Cangjie-TPC/codeformat4cj/tree/codeformat_hybrid-cangjie-plugin-5.1.1",
+  "repository": "https://gitcode.com/Cangjie-TPC/codeformat4cj/tree/codeformat_hybrid_cangjie-plugin-6.1.1_compatibility",
   "homepage": "https://gitcode.com/Cangjie-TPC",
   "keywords": [
     "codeformat",
