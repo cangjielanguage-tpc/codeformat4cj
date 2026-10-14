@@ -17,6 +17,6 @@ body:
     id: version
     attributes:
       label: "受影响的分支版本 | Affected branch versions"
-      description: "请选择您的问题涉及的分支版本： | Please select the branch versions involved in your question."
+      description: "请填写您的问题涉及的分支版本： | Please provide the branch versions involved in your question."
     validations:
       required: true

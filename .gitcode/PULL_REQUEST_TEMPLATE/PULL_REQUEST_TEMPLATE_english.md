@@ -4,7 +4,7 @@ Please describe the changes in this Pull Request.
 
 ## Change Type (Required)
 
-Please describe the type of changes in this Pull Request (reason). **Simply save and click the checkbox, or when editing, change `[ ]` to `[x]` for the relevant item.**
+Please describe the type of changes in this Pull Request (reason). **Please check the corresponding option below (change `[ ]` to `[X]`).**
 
 - [ ] Feature
 - [ ] Bugfix
@@ -13,17 +13,17 @@ Please describe the type of changes in this Pull Request (reason). **Simply save
 
 ## Self-Check of Changes (Required)
 
-**Please do not modify or delete the following options. Simply save and click the checkbox, or when editing, change `[ ]` to `[x]` for the relevant item.**
+**Please check the corresponding option below (change `[ ]` to `[X]`).**
 
 ### Local Compilation Verification Results:
 
-- [ ] compiled successfully
+- [ ] Compiled successfully
 - [ ] Not applicable
 
 ### Local Test Case Verification Results:
 
-- [ ] Pass.
-- [ ] Not applicable.
+- [ ] Pass
+- [ ] Not applicable
 
 ## Related Issues
 
