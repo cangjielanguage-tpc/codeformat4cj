@@ -23,6 +23,6 @@ body:
     id: version
     attributes:
       label: "新需求涉及的分支版本 | Branch versions involved in the new feature"
-      description: "请选择涉及的分支版本： | Please select the involved branch versions."
+      description: "请填写涉及的分支版本： | Please provide the involved branch versions."
     validations:
       required: true

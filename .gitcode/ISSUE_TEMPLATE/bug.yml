@@ -29,6 +29,13 @@ body:
       required: true
   - type: textarea
     attributes:
+      label: "系统环境 | System environment"
+      description: "请提供操作系统、CPU 架构等环境信息： | Please provide system environment information such as OS and CPU architecture."
+      placeholder: "OS: \nCPU: "
+    validations:
+      required: true
+  - type: textarea
+    attributes:
       label: "其他补充信息 | Additional information"
       description: "补充下其他您认为需要提供的信息： | Add any other information you think is necessary to provide."
     validations:
@@ -36,11 +43,12 @@ body:
   - type: textarea
     attributes:
       label: "编译器版本信息 | compiler version information"
-      description: "请将 `cjc / deveco / cangjie-plugin` 版本信息填写在下方： | Please provide `cjc / deveco / cangjie-plugin` infomation."
+      description: "请将 `cjc / deveco / cangjie-plugin` 版本信息填写在下方： | Please provide `cjc / deveco / cangjie-plugin` information."
       placeholder: ""
     validations:
       required: true
   - type: textarea
+    id: version
     attributes:
       label: "branch / tag 信息 | branch / tag information"
       description: "在哪些版本存在该缺陷？ | In which versions does this bug exist?"
