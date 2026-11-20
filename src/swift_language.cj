@@ -290,6 +290,9 @@ class SwiftFormat <: GeneralProcessing {
                 if ((codeStr == "set{" || codeStr == "get{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
                     while (!(nextLineBean.codeLine.trimAscii().endsWith("}") &&
                     (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
@@ -323,6 +326,9 @@ class SwiftFormat <: GeneralProcessing {
                 if (codeStr.startsWith("switch") && codeStr.endsWith("{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
@@ -389,10 +395,7 @@ class SwiftFormat <: GeneralProcessing {
                     !lineBean.isInSinglelineComment) {
                     var x = 1
                     var nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
-                    while (stateBean.linesList[i + x].codeLine.trimAscii().contains(":")) {
-                        if (i + x >= stateBean.linesList.size) {
-                            break
-                        }
+                    while (i + x < stateBean.linesList.size && stateBean.linesList[i + x].codeLine.trimAscii().contains(":")) {
                         stateBean.linesList[i + x].indentLevel++
                         x++
                     }

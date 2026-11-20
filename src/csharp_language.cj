@@ -256,6 +256,9 @@ class CsharpFormat <: GeneralProcessing {
                 if (codeStr.startsWith("switch") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
                     if (nextLineBean.codeLine.trimAscii() == "{") {
                         x++

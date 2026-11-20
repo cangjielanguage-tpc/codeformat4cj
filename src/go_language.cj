@@ -656,14 +656,23 @@ class GoFormat <: GeneralProcessing {
                 }
 
                 if (lineBean.codeLine.contains("`") &&
-                !(lineBean.codeLine.trimAscii() == "`") &&
-                !handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)) {
+                !(lineBean.codeLine.trimAscii() == "`")) {
+                    let backIdx = lineBean.codeLine.indexOf("`").getOrThrow()
+                    if (backIdx == 0 || !handleTransferCharacters(lineBean.codeLine.toRuneArray(), backIdx - 1)) {
+                        continue
+                    }
+                }
+                if (i + x >= stateBean.linesList.size) {
                     continue
                 }
                 var nextLineBean = stateBean.linesList[i + x]
                 while (!(nextLineBean.codeLine.trimAscii().endsWith("`") &&
-                (lineBean.codeLine.trimAscii() == "`" || handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)))) {
+                (lineBean.codeLine.trimAscii() == "`" || lineBean.codeLine.indexOf("`").getOrThrow() == 0 ||
+                handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)))) {
                     x++
+                    if (i + x >= stateBean.linesList.size) {
+                        break
+                    }
                     nextLineBean = stateBean.linesList[i + x]
                 }
                 x++
