@@ -647,6 +647,17 @@ class GoFormat <: GeneralProcessing {
                     continue
                 }
 
+                // SEC-H2: comment lines must never start the raw-string pairing scan.
+                // Doc comments with markdown code references (backticks around e.g. gofmt)
+                // are ubiquitous in Go; such a line passed every check below and started a
+                // bogus pairing scan that zeroed the indent of all following lines. Mixed
+                // code+comment lines carry the same flag (dealWithSingleLineComment sets it
+                // on the combined line), so both shapes are covered. Lines inside a real
+                // raw-string block are still handled by the x != 1 branch above.
+                if (lineBean.isInSinglelineComment || lineBean.isInMultilineComment) {
+                    continue
+                }
+
                 if (!lineBean.codeLine.contains("`")) {
                     continue
                 }
