@@ -294,8 +294,10 @@ class SwiftFormat <: GeneralProcessing {
                         continue
                     }
                     var nextLineBean = stateBean.linesList[i + x]
+                    // SEC-H5: rune-granularity check; double-right-brace lines used to index
+                    // the rune array at -1 and crash after multi-byte or line-leading targets
                     while (!(nextLineBean.codeLine.trimAscii().endsWith("}") &&
-                    (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
+                    (nextLineBean.codeLine.trimAscii() == "}" || isUnescapedTerminator(nextLineBean.codeLine, r'}')) &&
                     leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         x++

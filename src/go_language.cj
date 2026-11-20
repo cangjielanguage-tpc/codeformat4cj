@@ -657,8 +657,13 @@ class GoFormat <: GeneralProcessing {
 
                 if (lineBean.codeLine.contains("`") &&
                 !(lineBean.codeLine.trimAscii() == "`")) {
-                    let backIdx = lineBean.codeLine.indexOf("`").getOrThrow()
-                    if (backIdx == 0 || !handleTransferCharacters(lineBean.codeLine.toRuneArray(), backIdx - 1)) {
+                    // SEC-H5: rune-granularity lookup - String.indexOf returns a UTF-8 byte
+                    // offset, which overruns the rune array when multi-byte chars (e.g.
+                    // Chinese comments) precede the backtick. backIdx <= 0 keeps the
+                    // original "backtick at line start -> skip" behavior.
+                    let lineRunes = lineBean.codeLine.toRuneArray()
+                    let backIdx = firstRuneIndexOf(lineRunes, r'`')
+                    if (backIdx <= 0 || !handleTransferCharacters(lineRunes, backIdx - 1)) {
                         continue
                     }
                 }
@@ -666,9 +671,12 @@ class GoFormat <: GeneralProcessing {
                     continue
                 }
                 var nextLineBean = stateBean.linesList[i + x]
+                // SEC-H5: rune-granularity check (String.indexOf byte offsets could overrun
+                // the rune array after multi-byte chars). The first backtick of lineBean is
+                // fixed for the whole loop, so the check result is hoisted.
+                let isUnescapedBacktick = isUnescapedTerminator(lineBean.codeLine, r'`')
                 while (!(nextLineBean.codeLine.trimAscii().endsWith("`") &&
-                (lineBean.codeLine.trimAscii() == "`" || lineBean.codeLine.indexOf("`").getOrThrow() == 0 ||
-                handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)))) {
+                (lineBean.codeLine.trimAscii() == "`" || isUnescapedBacktick))) {
                     x++
                     if (i + x >= stateBean.linesList.size) {
                         break

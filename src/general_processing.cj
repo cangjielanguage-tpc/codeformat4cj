@@ -414,6 +414,17 @@ open class GeneralProcessing <: BaseLanguage {
     }
 
     public func handleTransferCharacters(charArr: Array<Rune>, lastIndex: Int64): Bool {
+        // SEC-H5: callers pass the index of the char before the escape-checked target.
+        // A target at position 0 used to arrive as -1 and byte-offset callers could
+        // exceed the rune-array size; the first access below had no bounds guard ->
+        // IndexOutOfBoundsException. -1 (target is the first char) answers "unescaped"
+        // (nothing before it can escape it); any overrun stays conservative (false).
+        if (lastIndex >= charArr.size) {
+            return false
+        }
+        if (lastIndex < 0) {
+            return true
+        }
         var count: Int64 = 0
         var indexChar: Rune = charArr[lastIndex - count]
         while (indexChar == r'\\') {
@@ -428,6 +439,37 @@ open class GeneralProcessing <: BaseLanguage {
         } else {
             return false
         }
+    }
+
+    // SEC-H5: rune-granularity replacement for the "indexOf(...)-1" pattern.
+    // String.indexOf returns a UTF-8 BYTE offset while callers index a toRuneArray()
+    // (char granularity); multi-byte chars (e.g. Chinese comments/identifiers) made
+    // the byte offset overrun the rune array or hit a wrong element. Returns the
+    // rune index of the first occurrence of target, or -1 when absent.
+    public func firstRuneIndexOf(charArr: Array<Rune>, target: Rune): Int64 {
+        for (i in 0..charArr.size) {
+            if (charArr[i] == target) {
+                return i
+            }
+        }
+        return -1
+    }
+
+    // SEC-H5: per-line terminator check used by the go/rust/swift block-scan loops.
+    // True when the first occurrence of target in line is not escaped (a target at
+    // position 0 counts as unescaped: no preceding char can escape it); false when
+    // the target is absent or escaped. Replaces the crash-prone inline pattern of
+    // indexing a rune array with a String.indexOf byte offset minus one.
+    public func isUnescapedTerminator(line: String, target: Rune): Bool {
+        let runes = line.toRuneArray()
+        let idx = firstRuneIndexOf(runes, target)
+        if (idx == 0) {
+            return true
+        }
+        if (idx < 0) {
+            return false
+        }
+        return handleTransferCharacters(runes, idx - 1)
     }
 
     func createLineBean(stateBean: StateBean, offset: Int64): LineBean {

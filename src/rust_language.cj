@@ -398,8 +398,11 @@ class RustFormat <: GeneralProcessing {
                             break
                         }
                         nextLineBean = stateBean.linesList[i + x]
+                        // SEC-H5: rune-granularity check; lines starting with a right brace
+                        // (e.g. brace-then-semicolon, brace-else-block) used to index the
+                        // rune array at -1 and crash
                         while (!(nextLineBean.codeLine.trimAscii().contains("}") &&
-                        (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
+                        (nextLineBean.codeLine.trimAscii() == "}" || isUnescapedTerminator(nextLineBean.codeLine, r'}')) &&
                         leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                             leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                             x++
