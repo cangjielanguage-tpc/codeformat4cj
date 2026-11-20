@@ -116,7 +116,11 @@ class HtmlFormat <: GeneralProcessing {
                 stateBean.perLineOutput.append(currChar)
 
                 if (currChar == r'-' && stateBean.lastChar == r'-' && !stateBean.isInString) {
-                    if (stateBean.currentIndex >= 2 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
+                    // SEC-M1: guard was currentIndex >= 2 but the condition reads i[currentIndex - 3];
+                    // input starting with "!--" reached the check at currentIndex == 2 and indexed i[-1]
+                    // (IndexOutOfBoundsException). The window is [currentIndex-3 .. currentIndex],
+                    // so the correct lower bound is 3.
+                    if (stateBean.currentIndex >= 3 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
                         var str = stateBean.perLineOutput.toString().removeSuffix("<!--")
                         if (str.trimAscii().size > 0) {
                             dealWithMultiLineComment(stateBean, str)
