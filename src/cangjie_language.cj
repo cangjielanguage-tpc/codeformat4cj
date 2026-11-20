@@ -283,12 +283,25 @@ class CangjieFormat <: GeneralProcessing {
                     }
                     var j = 1
                     var nextLineBean: LineBean = stateBean.linesList[i + j]
+                    // SEC-H1: the scan used to have no bounds check inside the loop and only
+                    // exited on a line ending with the brace-paren tail. Allman-style bodies
+                    // (a standalone brace-only line after the if-line) or a file ending with
+                    // the if-line made the scan run past linesList (IndexOutOfBoundsException).
+                    // Each scanned line keeps exactly one extra indent; reaching the list end
+                    // just stops the scan.
+                    var hitEnd: Bool = false
                     while (!nextLineBean.codeLine.trimAscii().replace(" ", "").endsWith("){")) {
                         nextLineBean.indentLevel++
                         j++
+                        if (i + j >= stateBean.linesList.size) {
+                            hitEnd = true
+                            break
+                        }
                         nextLineBean = stateBean.linesList[i + j]
                     }
-                    nextLineBean.indentLevel++
+                    if (!hitEnd) {
+                        nextLineBean.indentLevel++
+                    }
                 }
             }
             removediscard(stateBean)
