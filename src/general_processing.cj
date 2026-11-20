@@ -472,8 +472,11 @@ open class GeneralProcessing <: BaseLanguage {
         if (notNullChar.size <= currentIndex + kwLen - 1) {
             return false
         }
+        // SEC-M3: hoist toRuneArray() out of the comparison loop (was re-allocating
+        // a fresh array on every iteration)
+        let kwChars = kw.toRuneArray()
         for (i in 0..kwLen) {
-            if (notNullChar[currentIndex + i].toAsciiLowerCase() != kw.toRuneArray()[i].toAsciiLowerCase()) {
+            if (notNullChar[currentIndex + i].toAsciiLowerCase() != kwChars[i].toAsciiLowerCase()) {
                 return false
             }
         }

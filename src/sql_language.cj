@@ -621,8 +621,11 @@ class SqlFormat <: BaseLanguage {
         let currentIndex: Int64 = stateBean.currentIndex
         if(currentIndex >= keyWord.size - 1){
             var matchLetter:Bool = true
+            // SEC-M3: hoist toRuneArray() out of the comparison loop (was re-allocating
+            // a fresh array on every iteration; kept for API compatibility)
+            let kwChars = keyWord.toRuneArray()
             for(i in 0..keyWord.size){
-                if(!(notNullChar[currentIndex + 1 - keyWord.size + i].toAsciiLowerCase() == keyWord.toRuneArray()[i].toAsciiLowerCase())){
+                if(!(notNullChar[currentIndex + 1 - keyWord.size + i].toAsciiLowerCase() == kwChars[i].toAsciiLowerCase())){
                     matchLetter = false
                     break
                 }
@@ -630,6 +633,33 @@ class SqlFormat <: BaseLanguage {
             if(matchLetter){
                 dealWithKeyWorldUpper(keyWord,currentIndex,notNullChar)
             }
+        }
+    }
+
+    // SEC-M3: precomputed-rune fast path for the hot loop (one call per char per keyword,
+    // zero allocations). KeyWorldList is pure ASCII, so byte size == rune count and the
+    // matching semantics are bit-identical to the String version above.
+    private func dealWithSqlKeyWordRune(stateBean:StateBean,kwChars:Array<Rune>):Unit{
+        let notNullChar: Array<Rune> = stateBean.codeChars.getOrThrow()
+        let currentIndex: Int64 = stateBean.currentIndex
+        let kwLen: Int64 = kwChars.size
+        if(currentIndex >= kwLen - 1){
+            var matchLetter:Bool = true
+            for(i in 0..kwLen){
+                if(!(notNullChar[currentIndex + 1 - kwLen + i].toAsciiLowerCase() == kwChars[i].toAsciiLowerCase())){
+                    matchLetter = false
+                    break
+                }
+            }
+            if(matchLetter){
+                dealWithKeyWorldUpperRune(kwChars,currentIndex,notNullChar)
+            }
+        }
+    }
+
+    private func dealWithKeyWorldUpperRune(kwChars:Array<Rune>,currentIndex:Int64,notNullChar: Array<Rune>):Unit{
+        for(i in 0..kwChars.size){
+            notNullChar[currentIndex-kwChars.size+1+i] = kwChars[i].toAsciiUpperCase()
         }
     }
 
@@ -2024,6 +2054,14 @@ class SqlFormat <: BaseLanguage {
             if (len == 0) {
                 return ""
             }
+            // SEC-M3: convert every keyword to its rune array ONCE per format call.
+            // The per-char keyword scan below used to re-allocate an array per
+            // (char x keyword x comparison iteration); with 1210 keywords that is
+            // billions of allocations on a 10 MB input (CPU DoS).
+            let kwRuneList: ArrayList<Array<Rune>> = ArrayList<Array<Rune>>()
+            for (kw in KeyWorldList) {
+                kwRuneList.add(kw.toRuneArray())
+            }
             while (stateBean.currentIndex < len) {
                 let currChar = i[stateBean.currentIndex]
                 stateBean.perLineOutput.append(currChar)
@@ -2048,8 +2086,9 @@ class SqlFormat <: BaseLanguage {
                 dealWithString(stateBean)
 
                 if (!stateBean.isInString) {
-                    for(i in 0..KeyWorldList.size){
-                        dealWithSqlKeyWord(stateBean,KeyWorldList[i])
+                    // SEC-M3: iterate precomputed rune arrays (matching logic unchanged)
+                    for(kwChars in kwRuneList){
+                        dealWithSqlKeyWordRune(stateBean,kwChars)
                     }
                  }
 
