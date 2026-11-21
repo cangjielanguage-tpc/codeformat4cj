@@ -254,8 +254,22 @@ class CsharpFormat <: GeneralProcessing {
                 let lineBean: LineBean = stateBean.linesList[i]
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
                 if (codeStr.startsWith("switch") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
+                    // SEC-H4: word-boundary check - identifiers like "switched = true;" also
+                    // matched startsWith("switch") and started a bogus case-indent scan that
+                    // shifted the indent of every following non-case line. A real switch
+                    // statement continues with an opening parenthesis or an opening brace
+                    // after the keyword; codeStr here has all spaces stripped. The rune
+                    // conversion runs only for switch-prefixed lines, so other lines pay
+                    // nothing.
+                    let codeRunes = codeStr.toRuneArray()
+                    if (!(codeRunes.size > 6 && (codeRunes[6] == r'(' || codeRunes[6] == r'{'))) {
+                        continue
+                    }
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
                     if (nextLineBean.codeLine.trimAscii() == "{") {
                         x++

@@ -11,6 +11,7 @@ import std.unittest.testmacro.*
 main() {
     let formatGo = FormatGo()
     formatGo.testGoFormat()
+    formatGo.testGoBacktickCommentNoCrash()
     return 0
 }
 
@@ -230,5 +231,23 @@ fmt.Println("demo finished")
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
         @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+
+    @TestCase
+    func testGoBacktickCommentNoCrash() {
+        // SEC-H2 regression (issue #109/#110): a comment containing backticks (markdown
+        // code reference) used to start a bogus raw-string pairing scan that zeroed the
+        // indent of all following lines; the scan is now comment-excluded and fully
+        // bounds-checked.
+        let goCode = #"
+// see `gofmt` style
+package main
+import "fmt"
+func main() {
+    fmt.Println("hello")
+}
+"#
+        let output = codeFormat("go", goCode, FormatConfig())
+        @Assert(output.contains("gofmt"))
     }
 }

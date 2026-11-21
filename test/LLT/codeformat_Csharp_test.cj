@@ -11,6 +11,7 @@ import std.unittest.testmacro.*
 main() {
     let formatCsharp = FormatCsharp()
     formatCsharp.testCsharpFormat()
+    formatCsharp.testCsharpSwitchWordBoundaryNoCrash()
     return 0
 }
 
@@ -471,5 +472,22 @@ Console.WriteLine($"{v1.Greet()} + {v2.Greet()} = {sum.Greet()}");
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
         @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+
+    @TestCase
+    func testCsharpSwitchWordBoundaryNoCrash() {
+        // SEC-H4 regression: identifiers like "switched = true;" matched
+        // startsWith("switch") and started a bogus case-indent scan. The entry now
+        // requires an opening parenthesis or an opening brace right after the keyword.
+        let csCode = #"
+switched = true;
+switch (x)
+{
+    case 1:
+        break;
+}
+"#
+        let output = codeFormat("c#", csCode, FormatConfig())
+        @Assert(output.contains("case"))
     }
 }

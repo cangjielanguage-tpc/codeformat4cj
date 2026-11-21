@@ -259,13 +259,15 @@ class CangjieFormat <: GeneralProcessing {
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
                 if (codeStr.startsWith("if(") && (codeStr.endsWith(")")) && !lineBean.isInMultilineComment &&
                     !lineBean.isInSinglelineComment) {
-                    let nextLineBean: LineBean = stateBean.linesList[i + 1]
-                    if (i < stateBean.linesList.size - 1 && nextLineBean.codeLine.trimAscii().replace(" ", "").endsWith("{")) {
-                        let stringbuilder: StringBuilder = StringBuilder()
-                        stringbuilder.append(lineBean.codeLine.trimAscii() + " ")
-                        stringbuilder.append(nextLineBean.codeLine.trimAscii())
-                        lineBean.codeLine = stringbuilder.toString().replace("\n", "")
-                        nextLineBean.isDiscarded = true
+                    if (i < stateBean.linesList.size - 1) {
+                        let nextLineBean: LineBean = stateBean.linesList[i + 1]
+                        if (nextLineBean.codeLine.trimAscii().replace(" ", "").endsWith("{")) {
+                            let stringbuilder: StringBuilder = StringBuilder()
+                            stringbuilder.append(lineBean.codeLine.trimAscii() + " ")
+                            stringbuilder.append(nextLineBean.codeLine.trimAscii())
+                            lineBean.codeLine = stringbuilder.toString().replace("\n", "")
+                            nextLineBean.isDiscarded = true
+                        }
                     }
                 }
             }
@@ -276,14 +278,30 @@ class CangjieFormat <: GeneralProcessing {
                 let codeStr = lineBean.codeLine.trimAscii().replace(" ", "")
                 if (codeStr.startsWith("if(") && !(codeStr.endsWith("){")) && !lineBean.isInMultilineComment &&
                     !lineBean.isInSinglelineComment) {
+                    if (i + 1 >= stateBean.linesList.size) {
+                        continue
+                    }
                     var j = 1
                     var nextLineBean: LineBean = stateBean.linesList[i + j]
+                    // SEC-H1: the scan used to have no bounds check inside the loop and only
+                    // exited on a line ending with the brace-paren tail. Allman-style bodies
+                    // (a standalone brace-only line after the if-line) or a file ending with
+                    // the if-line made the scan run past linesList (IndexOutOfBoundsException).
+                    // Each scanned line keeps exactly one extra indent; reaching the list end
+                    // just stops the scan.
+                    var hitEnd: Bool = false
                     while (!nextLineBean.codeLine.trimAscii().replace(" ", "").endsWith("){")) {
                         nextLineBean.indentLevel++
                         j++
+                        if (i + j >= stateBean.linesList.size) {
+                            hitEnd = true
+                            break
+                        }
                         nextLineBean = stateBean.linesList[i + j]
                     }
-                    nextLineBean.indentLevel++
+                    if (!hitEnd) {
+                        nextLineBean.indentLevel++
+                    }
                 }
             }
             removediscard(stateBean)
@@ -430,7 +448,7 @@ class CangjieFormat <: GeneralProcessing {
                 if (unclosedSymbols &&
                 !lineBean.isInMultilineComment && 
                 !lineBean.isInSinglelineComment) {
-                    if (i < stateBean.linesList.size - 1) {
+                    if (i > 0 && i < stateBean.linesList.size - 1) {
                         var lastLineBean: LineBean = stateBean.linesList[i - 1]
                         for (i in 0..rightSymbolArr.size) {
                             var antiSymbol = match (rightSymbolArr[i]) {

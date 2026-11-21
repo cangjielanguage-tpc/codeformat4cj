@@ -290,9 +290,14 @@ class SwiftFormat <: GeneralProcessing {
                 if ((codeStr == "set{" || codeStr == "get{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
+                    // SEC-H5: rune-granularity check; double-right-brace lines used to index
+                    // the rune array at -1 and crash after multi-byte or line-leading targets
                     while (!(nextLineBean.codeLine.trimAscii().endsWith("}") &&
-                    (nextLineBean.codeLine.trimAscii() == "}" || handleTransferCharacters(nextLineBean.codeLine.toRuneArray(), nextLineBean.codeLine.indexOf("}").getOrThrow() - 1)) &&
+                    (nextLineBean.codeLine.trimAscii() == "}" || isUnescapedTerminator(nextLineBean.codeLine, r'}')) &&
                     leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
                         x++
@@ -323,6 +328,9 @@ class SwiftFormat <: GeneralProcessing {
                 if (codeStr.startsWith("switch") && codeStr.endsWith("{") && !lineBean.isInMultilineComment && !lineBean.isInSinglelineComment) {
                     var x = 1
                     var leftBrace = 0
+                    if (i + x >= stateBean.linesList.size) {
+                        continue
+                    }
                     var nextLineBean = stateBean.linesList[i + x]
                     while (!(leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}") == -1)) {
                         leftBrace = leftBrace + nextLineBean.codeLine.count("{") - nextLineBean.codeLine.count("}")
@@ -388,11 +396,10 @@ class SwiftFormat <: GeneralProcessing {
                     !lineBean.isInMultilineComment &&
                     !lineBean.isInSinglelineComment) {
                     var x = 1
-                    var nextLineBeanStr = stateBean.linesList[i + x].codeLine.trimAscii()
-                    while (stateBean.linesList[i + x].codeLine.trimAscii().contains(":")) {
-                        if (i + x >= stateBean.linesList.size) {
-                            break
-                        }
+                    // SEC-L fix: 移除未使用的预取变量（赋值后从未读取，属死代码）。
+                    // 该处的首次访问由入口条件 (i + 1 < size) 守卫，删除后无行为变化；
+                    // 循环体的访问由 while 条件的 i + x < size 短路子句守卫。
+                    while (i + x < stateBean.linesList.size && stateBean.linesList[i + x].codeLine.trimAscii().contains(":")) {
                         stateBean.linesList[i + x].indentLevel++
                         x++
                     }

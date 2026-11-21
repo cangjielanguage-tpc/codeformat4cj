@@ -301,8 +301,11 @@ class PythonFormat <: BaseLanguage {
         let chars = stateBean.codeChars.getOrThrow()
         let ci = stateBean.currentIndex
         if (ci < kwLen - 1 || chars.size <= ci) { return false }
+        // SEC-M3: hoist toRuneArray() out of the comparison loop (was re-allocating
+        // a fresh array on every iteration)
+        let kwChars = kw.toRuneArray()
         for (i in 0..kwLen) {
-            if (chars[ci - kwLen + 1 + i].toAsciiLowerCase() != kw.toRuneArray()[i].toAsciiLowerCase()) { return false }
+            if (chars[ci - kwLen + 1 + i].toAsciiLowerCase() != kwChars[i].toAsciiLowerCase()) { return false }
         }
         return true
     }

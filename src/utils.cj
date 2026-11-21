@@ -2,16 +2,30 @@ package codeformat
 
 internal import std.collection.ArrayList
 
+// SEC-M2: indentation amplification caps. indentLevel accumulates linearly with
+// unmatched braces / colons / then / do keywords (per-language increment sites) and
+// used to be multiplied verbatim into the per-line indent: output size O(lines x level),
+// so a ~100 KB input of unclosed blocks produced GB-scale output (memory exhaustion /
+// host hang). addIndent is the SINGLE emission choke point shared by every language
+// formatter, so capping the operands here bounds every language's output to
+// O(lines x MAX_INDENT_LEVEL x MAX_INDENT_WIDTH) without touching any of the
+// per-language increment sites. Operands are clamped BEFORE the multiplication,
+// which also makes Int64 overflow (OverflowException) structurally impossible.
+const MAX_INDENT_LEVEL: Int64 = 64
+const MAX_INDENT_WIDTH: Int64 = 64
+
 func addIndent(codeBuilder: StringBuilder, level: Int64, cfg: FormatConfig) {
     if (level <= 0) {
         return
     }
+    let safeLevel = if (level > MAX_INDENT_LEVEL) { MAX_INDENT_LEVEL } else { level }
     if (cfg.useTab) {
-        for (_ in 0..level) {
+        for (_ in 0..safeLevel) {
             codeBuilder.append("\t")
         }
     } else {
-        for (_ in 0..cfg.indentWidth * level) {
+        let width = if (cfg.indentWidth > MAX_INDENT_WIDTH) { MAX_INDENT_WIDTH } else { cfg.indentWidth }
+        for (_ in 0..width * safeLevel) {
             codeBuilder.append(" ")
         }
     }
@@ -81,36 +95,43 @@ public func codeFormat(languageType: ?String, code: String, cfg: FormatConfig): 
 }
 
 extend String {
+    // SEC-L2 fix: rune-granularity slicing - the old implementation indexed UTF-8
+    // bytes (this.get(i)) and re-assembled them byte-by-byte via fromUtf8, which
+    // corrupted multi-byte characters (e.g. Chinese) inside the range. Rune indexing
+    // keeps every character intact; behavior is unchanged for ASCII input
+    // (1 byte == 1 rune), which covers all current call sites.
     func substring(beginIndex: Int64, endIndex: Int64): String {
-        let strLen = this.size
+        let runeArr = this.toRuneArray()
+        let runeLen = runeArr.size
         if (beginIndex < 0 || endIndex < 0) {
             return this
         }
         if (beginIndex >= endIndex) {
             return ""
         }
-        if (beginIndex >= strLen) {
+        if (beginIndex >= runeLen) {
             return ""
         }
-        let actualEndIndex = if (endIndex > strLen) { strLen } else { endIndex }
+        let actualEndIndex = if (endIndex > runeLen) { runeLen } else { endIndex }
         let sb = StringBuilder()
         for (i in beginIndex..actualEndIndex) {
-            sb.append(fromUtf8(this.get(i).getOrThrow()))
+            sb.append(runeArr[i])
         }
         return sb.toString()
     }
 
     func substring(beginIndex: Int64): String {
-        let strLen = this.size
+        let runeArr = this.toRuneArray()
+        let runeLen = runeArr.size
         if (beginIndex < 0) {
             return this
         }
-        if (beginIndex >= strLen) {
+        if (beginIndex >= runeLen) {
             return ""
         }
         let sb = StringBuilder()
-        for (i in beginIndex..strLen) {
-            sb.append(fromUtf8(this.get(i).getOrThrow()))
+        for (i in beginIndex..runeLen) {
+            sb.append(runeArr[i])
         }
         return sb.toString()
     }

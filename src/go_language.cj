@@ -647,6 +647,17 @@ class GoFormat <: GeneralProcessing {
                     continue
                 }
 
+                // SEC-H2: comment lines must never start the raw-string pairing scan.
+                // Doc comments with markdown code references (backticks around e.g. gofmt)
+                // are ubiquitous in Go; such a line passed every check below and started a
+                // bogus pairing scan that zeroed the indent of all following lines. Mixed
+                // code+comment lines carry the same flag (dealWithSingleLineComment sets it
+                // on the combined line), so both shapes are covered. Lines inside a real
+                // raw-string block are still handled by the x != 1 branch above.
+                if (lineBean.isInSinglelineComment || lineBean.isInMultilineComment) {
+                    continue
+                }
+
                 if (!lineBean.codeLine.contains("`")) {
                     continue
                 }
@@ -656,14 +667,31 @@ class GoFormat <: GeneralProcessing {
                 }
 
                 if (lineBean.codeLine.contains("`") &&
-                !(lineBean.codeLine.trimAscii() == "`") &&
-                !handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)) {
+                !(lineBean.codeLine.trimAscii() == "`")) {
+                    // SEC-H5: rune-granularity lookup - String.indexOf returns a UTF-8 byte
+                    // offset, which overruns the rune array when multi-byte chars (e.g.
+                    // Chinese comments) precede the backtick. backIdx <= 0 keeps the
+                    // original "backtick at line start -> skip" behavior.
+                    let lineRunes = lineBean.codeLine.toRuneArray()
+                    let backIdx = firstRuneIndexOf(lineRunes, r'`')
+                    if (backIdx <= 0 || !handleTransferCharacters(lineRunes, backIdx - 1)) {
+                        continue
+                    }
+                }
+                if (i + x >= stateBean.linesList.size) {
                     continue
                 }
                 var nextLineBean = stateBean.linesList[i + x]
+                // SEC-H5: rune-granularity check (String.indexOf byte offsets could overrun
+                // the rune array after multi-byte chars). The first backtick of lineBean is
+                // fixed for the whole loop, so the check result is hoisted.
+                let isUnescapedBacktick = isUnescapedTerminator(lineBean.codeLine, r'`')
                 while (!(nextLineBean.codeLine.trimAscii().endsWith("`") &&
-                (lineBean.codeLine.trimAscii() == "`" || handleTransferCharacters(lineBean.codeLine.toRuneArray(), lineBean.codeLine.indexOf("`").getOrThrow() - 1)))) {
+                (lineBean.codeLine.trimAscii() == "`" || isUnescapedBacktick))) {
                     x++
+                    if (i + x >= stateBean.linesList.size) {
+                        break
+                    }
                     nextLineBean = stateBean.linesList[i + x]
                 }
                 x++

@@ -116,7 +116,11 @@ class HtmlFormat <: GeneralProcessing {
                 stateBean.perLineOutput.append(currChar)
 
                 if (currChar == r'-' && stateBean.lastChar == r'-' && !stateBean.isInString) {
-                    if (stateBean.currentIndex >= 2 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
+                    // SEC-M1: guard was currentIndex >= 2 but the condition reads i[currentIndex - 3];
+                    // input starting with "!--" reached the check at currentIndex == 2 and indexed i[-1]
+                    // (IndexOutOfBoundsException). The window is [currentIndex-3 .. currentIndex],
+                    // so the correct lower bound is 3.
+                    if (stateBean.currentIndex >= 3 && i[stateBean.currentIndex - 2] == r'!' && i[stateBean.currentIndex - 3] == r'<') {
                         var str = stateBean.perLineOutput.toString().removeSuffix("<!--")
                         if (str.trimAscii().size > 0) {
                             dealWithMultiLineComment(stateBean, str)
@@ -268,14 +272,17 @@ class HtmlFormat <: GeneralProcessing {
                             }
                         } else if (nextLineBean.codeLine.contains("<") && nextLineBean.codeLine.trimAscii().endsWith(">")) {
                             var x = 1
+                            // SEC-L fix: 单一 StringBuilder 跨循环累积——原先每轮新建 SB 并整串回拼，
+                            // k 行文本块共 O(k²) 字节拷贝（超长文本块格式化卡顿）；现在累积后一次性
+                            // toString，总拷贝 O(k)。扫描与丢弃语义与原实现完全一致。
+                            let merged: StringBuilder = StringBuilder()
+                            merged.append(lineBean.codeLine)
                             while (i + x < stateBean.linesList.size && !stateBean.linesList[i + x].codeLine.trimAscii().startsWith("<")) {
-                                let stringbuilder: StringBuilder = StringBuilder()
-                                stringbuilder.append(lineBean.codeLine)
-                                stringbuilder.append(stateBean.linesList[i + x].codeLine)
-                                lineBean.codeLine = stringbuilder.toString()
+                                merged.append(stateBean.linesList[i + x].codeLine)
                                 stateBean.linesList[i + x].isDiscarded = true
                                 x++
                             }
+                            lineBean.codeLine = merged.toString()
                         }
                     }
                 }
