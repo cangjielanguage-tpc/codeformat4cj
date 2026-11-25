@@ -11,6 +11,7 @@ import std.unittest.testmacro.*
 main() {
     let formatHtml = FormatHtml()
     formatHtml.testHtmlFormat()
+    formatHtml.testHtmlExclamationDashInputNoCrash()
     return 0
 }
 
@@ -207,5 +208,15 @@ console.log("HTML格式化测试文件加载完成");
         let expectedStr = String.fromUtf8(allBytes)
         // File.writeTo("../../../test/LLT/html.txt", output.toArray())
         @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+
+    @TestCase
+    func testHtmlExclamationDashInputNoCrash() {
+        // SEC-M1 regression (issue #111): html input starting with "!--" used to throw
+        // IndexOutOfBoundsException (array index -1) in the comment trigger check at
+        // formatCode. The guard is now currentIndex >= 3; this case pins the no-crash
+        // behavior and that the raw text survives formatting.
+        let output = codeFormat("html", "!--abc", FormatConfig())
+        @Assert(output.contains("!--abc"))
     }
 }

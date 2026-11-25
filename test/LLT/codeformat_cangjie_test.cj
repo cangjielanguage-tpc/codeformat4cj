@@ -11,6 +11,7 @@ import std.unittest.testmacro.*
 main() {
     let formatCangjie = FormatCangjie()
     formatCangjie.testCangjieFormat()
+    formatCangjie.testCangjieAllmanIfNoCrash()
     return 0
 }
 
@@ -469,5 +470,20 @@ this.y += dy
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
         @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+
+    @TestCase
+    func testCangjieAllmanIfNoCrash() {
+        // SEC-H1 regression (issue #109/#110): an if-line followed by a standalone
+        // brace line (Allman style) used to run the keyword scan past linesList
+        // (IndexOutOfBoundsException). The scan is now bounds-checked (hitEnd).
+        let cjCode = #"
+if (a > 0)
+{
+    foo()
+}
+"#
+        let output = codeFormat("cangjie", cjCode, FormatConfig())
+        @Assert(output.contains("foo"))
     }
 }

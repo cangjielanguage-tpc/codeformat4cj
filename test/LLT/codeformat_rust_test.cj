@@ -11,6 +11,7 @@ import std.unittest.testmacro.*
 main() {
     let formatRust = FormatRust()
     formatRust.testRustFormat()
+    formatRust.testRustClosingBraceLinesNoCrash()
     return 0
 }
 
@@ -339,5 +340,26 @@ println!("=== Rust Format Test End ===");
         let allBytes: Array<Byte> = File.readFrom(filePath)
         let expectedStr = String.fromUtf8(allBytes)
         @Assert(output, expectedStr.replace("\r\n","\n"))
+    }
+
+    @TestCase
+    func testRustClosingBraceLinesNoCrash() {
+        // SEC-H3/SEC-H4 regression (issue #109/#110): lines starting with "}" ("};",
+        // "} else {") and multi-line calls used to crash the block scans with
+        // IndexOutOfBoundsException (index -1 / past-end fetch). All scans are now
+        // bounds-checked and rune-granular; brace counting is no longer skewed by
+        // braces inside strings (let s = "{").
+        let rustCode = #"
+fn main() {
+    let r = foo(
+        arg1, arg2);
+    if a {
+    } else {
+    };
+    let s = "{";
+}
+"#
+        let output = codeFormat("rust", rustCode, FormatConfig())
+        @Assert(output.contains("fn main"))
     }
 }
