@@ -8,6 +8,11 @@ internal import ohos.hilog.Hilog
 internal import codeformat.codeFormat
 internal import codeformat.FormatConfig
 
+// SEC-HY3: indentWidth 钳制上限——与依赖侧 addIndent 的 MAX_INDENT_WIDTH 对齐。
+// 极端配置（2^40 级 / 接近 Int64.Max）不再透传依赖，阻断缩进输出放大（OOM 面）
+// 与 Int64 乘法溢出；负值/0 归 0（空缩进，与依赖原语义一致）。
+const MAX_INDENT_WIDTH: Int64 = 64
+
 // SEC-HY1：依赖 codeformat v1.0.7 存在常规输入即可触发的未捕获运行时异常
 // （IndexOutOfBoundsException / 负下标 / OverflowException——语言实现层大量
 // 无防护下标访问，如 linesList[i-1]、[i+2]、tailCodeArr[size-1] 等；本层
@@ -52,7 +57,16 @@ func codeFormatWithWhiteSpace(runtime: JSContext, callInfo: JSCallInfo): JSValue
         let langType = langTypeArg(callInfo[0])
         let code = callInfo[1].asString().toString()
         let indentWidth = callInfo[2].toNumber()
-        codeFormat(langType, code, FormatConfig(indentWidth: Int64(indentWidth), useTab: false))
+        // SEC-HY3 fix: 封装层钳制（不依赖依赖发版即可生效）——转换结果超出 0..64
+        // 的部分按边界收敛；转换异常仍由外层 safeFormatToJS 统一兜底
+        var clampedWidth = Int64(indentWidth)
+        if (clampedWidth > MAX_INDENT_WIDTH) {
+            clampedWidth = MAX_INDENT_WIDTH
+        }
+        if (clampedWidth < 0) {
+            clampedWidth = 0
+        }
+        codeFormat(langType, code, FormatConfig(indentWidth: clampedWidth, useTab: false))
     }
 }
 
